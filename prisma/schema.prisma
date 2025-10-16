@@ -1,0 +1,46 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Enum for Swiss cantons if needed later — we default to Vaud (VD)
+enum Canton {
+    VD
+}
+
+model Location {
+    id        String   @id @default(cuid())
+    name      String
+    address   String?
+    city      String?
+    canton    Canton   @default(VD)
+    latitude  Float?
+    longitude Float?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    activities Activity[]
+
+    @@index([city])
+}
+
+model Activity {
+    id          String    @id @default(cuid())
+    name        String
+    description String?
+    startTime   DateTime?
+    endTime     DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    // Relations
+    locationId String
+    location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+    @@index([startTime])
+    @@index([locationId])
+}

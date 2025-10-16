@@ -57,3 +57,10 @@ npm-debug.*
 *.orig.*
 web-build/
 cache/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+*.env.local
