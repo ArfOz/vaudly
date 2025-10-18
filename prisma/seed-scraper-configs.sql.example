@@ -1,0 +1,45 @@
+-- ⚠️ WARNING: This file contains sensitive scraper configurations
+-- DO NOT commit this file to git
+-- Store this file securely and load it manually to your database
+
+-- Culture Vevey Scraper Config
+INSERT INTO "ScraperConfig" (
+  id, 
+  url, 
+  name, 
+  "typeName", 
+  "typeCode", 
+  "isActive", 
+  selectors,
+  "createdAt",
+  "updatedAt"
+)
+VALUES (
+  'culturevevey-agenda',
+  'https://www.culturevevey.ch/agenda/',
+  'Culture Vevey - Agenda',
+  'Culture Vevey',
+  'CULTURE_VEVEY',
+  true,
+  '{
+    "eventCard": ".col-event",
+    "title": "h2",
+    "category": "h3",
+    "description": ".event-description",
+    "date": ".event-dates",
+    "price": ".event-price",
+    "mapLink": ".fal.fa-map-marker-alt"
+  }'::jsonb,
+  NOW(),
+  NOW()
+)
+ON CONFLICT (url) DO UPDATE SET
+  name = EXCLUDED.name,
+  "typeName" = EXCLUDED."typeName",
+  "typeCode" = EXCLUDED."typeCode",
+  "isActive" = EXCLUDED."isActive",
+  selectors = EXCLUDED.selectors,
+  "updatedAt" = NOW();
+
+-- Add more scraper configs here
+-- Each site should have its own config with unique selectors

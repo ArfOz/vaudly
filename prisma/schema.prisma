@@ -12,6 +12,25 @@ enum Canton {
     VD
 }
 
+model ScraperConfig {
+    id          String    @id @default(cuid())
+    url         String    @unique
+    name        String
+    // store scraper type as name + code in the database (no enum)
+    typeName    String
+    typeCode    String
+    isActive    Boolean   @default(true)
+    lastScraped DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    // Optional JSON config for custom selectors
+    selectors Json?
+
+    @@index([isActive])
+    @@index([typeCode])
+}
+
 model Location {
     id        String   @id @default(cuid())
     name      String?
@@ -34,10 +53,9 @@ model Activity {
     name        String    @unique
     description String?
     category    String?
-    subtitle    String? // Added subtitle field
+    subtitle    String?
     date        String?
     price       String?
-    sourceUrl   String?
     startTime   DateTime?
     endTime     DateTime?
     createdAt   DateTime  @default(now())

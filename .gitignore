@@ -64,3 +64,13 @@ cache/
 .env.*.local
 *.env
 *.env.local
+
+# Scraper sensitive data
+apps/backend/src/scraper/scrapers/*
+apps/backend/src/scraper/factories/*
+prisma/seed.ts
+prisma/seed-scraper-configs.sql
+
+# Keep only interfaces and base services
+!apps/backend/src/scraper/scrapers/.gitkeep
+!apps/backend/src/scraper/factories/.gitkeep

@@ -7,8 +7,12 @@
     "prisma:db-push": "prisma db push",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
+    "prisma:seed": "tsx prisma/seed.ts",
     "start:backend": "nx serve backend",
     "build:backend": "nx build backend"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "private": true,
   "dependencies": {
