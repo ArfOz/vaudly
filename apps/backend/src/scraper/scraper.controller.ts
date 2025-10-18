@@ -2,10 +2,12 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Param,
   Post,
 } from '@nestjs/common';
 import { ScraperService } from './scraper.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 class ScrapeDto {
   url?: string;
@@ -14,7 +16,10 @@ class ScrapeDto {
 
 @Controller('scrape')
 export class ScraperController {
-  constructor(private readonly scraper: ScraperService) {}
+  constructor(
+    private readonly scraper: ScraperService,
+    private readonly prisma: PrismaService
+  ) {}
 
   /**
    * POST /api/scrape - Tek URL scrape et (eski yöntem)
@@ -48,5 +53,51 @@ export class ScraperController {
   @Post('config/:id')
   async scrapeConfig(@Param('id') id: string) {
     return this.scraper.scrapeWithConfig(id);
+  }
+
+  /**
+   * GET /api/scrape/configs - Tüm scraper config'leri listele
+   */
+  @Get('configs')
+  async getConfigs() {
+    return this.prisma.scraperConfig.findMany({
+      select: {
+        id: true,
+        url: true,
+        name: true,
+        typeName: true,
+        typeCode: true,
+        isActive: true,
+        lastScraped: true,
+        // selectors'ı gizle (güvenlik için)
+      },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  /**
+   * GET /api/scrape/configs/:id - Belirli bir config'i getir
+   */
+  @Get('configs/:id')
+  async getConfig(@Param('id') id: string) {
+    const config = await this.prisma.scraperConfig.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        url: true,
+        name: true,
+        typeName: true,
+        typeCode: true,
+        isActive: true,
+        lastScraped: true,
+        selectors: true, // Admin için selectors göster
+      },
+    });
+
+    if (!config) {
+      throw new BadRequestException(`Config with id ${id} not found`);
+    }
+
+    return config;
   }
 }
