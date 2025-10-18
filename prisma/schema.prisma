@@ -14,7 +14,7 @@ enum Canton {
 
 model Location {
     id        String   @id @default(cuid())
-    name      String
+    name      String?
     address   String?
     city      String?
     canton    Canton   @default(VD)
@@ -25,13 +25,19 @@ model Location {
 
     activities Activity[]
 
+    @@unique([address], name: "unique_location_address")
     @@index([city])
 }
 
 model Activity {
     id          String    @id @default(cuid())
-    name        String
+    name        String    @unique
     description String?
+    category    String?
+    subtitle    String? // Added subtitle field
+    date        String?
+    price       String?
+    sourceUrl   String?
     startTime   DateTime?
     endTime     DateTime?
     createdAt   DateTime  @default(now())
