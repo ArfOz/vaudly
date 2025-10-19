@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+﻿import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import puppeteer from 'puppeteer';
@@ -6,6 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { parse, isValid } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { LausanneTourismScraper } from './scrapers/lausanne-tourism.scraper';
 
 interface EventData {
   title: string;
@@ -37,42 +38,44 @@ export class ScraperService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Tüm aktif scraper config'leri çalıştır
+   * TÃ¼m aktif scraper config'leri Ã§alÄ±ÅŸtÄ±r
    */
   async scrapeAll(): Promise<EventData[]> {
-    this.logger.log('🚀 Starting scrapeAll from database configs...');
+    this.logger.log('ðŸš€ Starting scrapeAll from database configs...');
 
     const configs = await this.prisma.scraperConfig.findMany({
       where: { isActive: true },
     });
 
-    this.logger.log(`📋 Found ${configs.length} active scraper configs`);
+    this.logger.log(`ðŸ“‹ Found ${configs.length} active scraper configs`);
 
     const allEvents: EventData[] = [];
     for (const config of configs) {
       try {
-        this.logger.log(`🔄 Processing config: ${config.name} (${config.url})`);
+        this.logger.log(
+          `ðŸ”„ Processing config: ${config.name} (${config.url})`
+        );
         const events = await this.scrapeWithConfig(config.id);
         allEvents.push(...events);
 
-        // LastScraped güncelle
+        // LastScraped gÃ¼ncelle
         await this.prisma.scraperConfig.update({
           where: { id: config.id },
           data: { lastScraped: new Date() },
         });
       } catch (error) {
         this.logger.error(
-          `❌ Failed to scrape config ${config.name}: ${error.message}`
+          `âŒ Failed to scrape config ${config.name}: ${error.message}`
         );
       }
     }
 
-    this.logger.log(`✅ Total events scraped: ${allEvents.length}`);
+    this.logger.log(`âœ… Total events scraped: ${allEvents.length}`);
     return allEvents;
   }
 
   /**
-   * Belirli bir config ID'sine göre scrape et
+   * Belirli bir config ID'sine gÃ¶re scrape et
    */
   async scrapeWithConfig(configId: string): Promise<EventData[]> {
     const config = await this.prisma.scraperConfig.findUnique({
@@ -84,15 +87,143 @@ export class ScraperService {
     }
 
     if (!config.isActive) {
-      this.logger.warn(`⚠️ Config ${config.name} is not active, skipping`);
+      this.logger.warn(
+        `[WARNING] Config ${config.name} is not active, skipping`
+      );
       return [];
+    }
+
+    // ✨ Lausanne Tourism için özel scraper kullan
+    if (config.id === 'lausanne-tourism-events') {
+      this.logger.log(
+        `🎯 Using specialized Lausanne Tourism scraper with Puppeteer...`
+      );
+      const scraper = new LausanneTourismScraper();
+      const events = await scraper.scrape(config.url);
+
+      // Convert to EventData format
+      const eventDataArray: EventData[] = events.map((event) => ({
+        title: event.title,
+        category: event.category,
+        description: event.description || '',
+        date: event.date || '',
+        price: event.price || '',
+        address: event.address || '',
+        latitude: event.latitude || null,
+        longitude: event.longitude || null,
+        startTime: event.startTime?.toISOString() || null,
+        endTime: event.endTime?.toISOString() || null,
+      }));
+
+      // 💾 Database'e kaydet (Culture Vevey gibi)
+      for (const event of eventDataArray) {
+        try {
+          // Location relation: find or create
+          let locationRelation:
+            | Prisma.ActivityCreateInput['location']
+            | Prisma.ActivityUpdateInput['location'];
+
+          if (event.address) {
+            let loc = await this.prisma.location.findFirst({
+              where: { address: event.address },
+            });
+            if (!loc) {
+              try {
+                loc = await this.prisma.location.create({
+                  data: {
+                    name: event.address || 'Default Location',
+                    address: event.address,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                  },
+                });
+              } catch (err) {
+                if (
+                  err instanceof Prisma.PrismaClientKnownRequestError &&
+                  err.code === 'P2002'
+                ) {
+                  loc = await this.prisma.location.findFirst({
+                    where: { address: event.address },
+                  });
+                } else {
+                  throw err;
+                }
+              }
+            } else {
+              // Update coordinates if provided
+              const needUpdate =
+                (event.latitude != null && loc.latitude !== event.latitude) ||
+                (event.longitude != null && loc.longitude !== event.longitude);
+              if (needUpdate) {
+                await this.prisma.location.update({
+                  where: { id: loc.id },
+                  data: {
+                    ...(event.latitude != null
+                      ? { latitude: event.latitude }
+                      : {}),
+                    ...(event.longitude != null
+                      ? { longitude: event.longitude }
+                      : {}),
+                  },
+                });
+              }
+            }
+
+            if (!loc) {
+              const created = await this.prisma.location.create({
+                data: {
+                  name: event.address || 'Default Location',
+                  address: event.address,
+                },
+              });
+              locationRelation = { connect: { id: created.id } };
+            } else {
+              locationRelation = { connect: { id: loc.id } };
+            }
+          } else {
+            locationRelation = { create: { name: 'Default Location' } };
+          }
+
+          await this.prisma.activity.upsert({
+            where: { name: event.title },
+            update: {
+              description: event.description,
+              category: event.category,
+              date: event.date,
+              price: event.price,
+              startTime: event.startTime ? new Date(event.startTime) : null,
+              endTime: event.endTime ? new Date(event.endTime) : null,
+              location: locationRelation,
+            },
+            create: {
+              name: event.title,
+              description: event.description,
+              category: event.category,
+              date: event.date,
+              price: event.price,
+              startTime: event.startTime ? new Date(event.startTime) : null,
+              endTime: event.endTime ? new Date(event.endTime) : null,
+              location: locationRelation,
+            },
+          });
+
+          this.logger.log(`💾 Saved event: ${event.title}`);
+        } catch (error) {
+          this.logger.error(
+            `❌ Failed to save event: ${event.title}`,
+            error?.message || error
+          );
+        }
+      }
+
+      return eventDataArray;
     }
 
     // Selectors'ı parse et (JSON olarak saklanıyor)
     const selectorsData = (config.selectors || {}) as Record<string, unknown>;
     const usePuppeteer = selectorsData.usePuppeteer === true;
 
-    // usePuppeteer'ı selectors'tan çıkar
+    // usePuppeteer'Ä± selectors'tan Ã§Ä±kar
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { usePuppeteer: _unused, ...selectors } = selectorsData;
 
@@ -103,14 +234,14 @@ export class ScraperService {
     customSelectors?: ScraperSelectors,
     usePuppeteer = false
   ): Promise<EventData[]> {
-    this.logger.log(`🔍 Scraping started for: ${url}`);
+    this.logger.log(`ðŸ” Scraping started for: ${url}`);
 
     try {
       let html: string;
 
-      // 🎭 Puppeteer ile JavaScript render'lı siteler için
+      // ðŸŽ­ Puppeteer ile JavaScript render'lÄ± siteler iÃ§in
       if (usePuppeteer) {
-        this.logger.log('🎭 Using Puppeteer for JavaScript-rendered content');
+        this.logger.log('ðŸŽ­ Using Puppeteer for JavaScript-rendered content');
         const browser = await puppeteer.launch({
           headless: true,
           args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -121,28 +252,85 @@ export class ScraperService {
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         );
 
-        this.logger.log(`📄 Loading ${url}...`);
+        this.logger.log(`ðŸ“„ Loading ${url}...`);
         await page.goto(url, {
           waitUntil: 'networkidle0',
           timeout: 90000,
         });
 
+        // Don't try to click Today button - it doesn't respond to programmatic clicks
+        // Instead, just wait and try to load more events with "Show more events"
+        this.logger.log(`⏳ Waiting for page to fully load...`);
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
         // Wait for event cards to appear
         const eventSelector =
           customSelectors?.eventCard || '.lt-agenda-event-card';
-        this.logger.log(`⏳ Waiting for selector: ${eventSelector}`);
+        this.logger.log(`â³ Waiting for selector: ${eventSelector}`);
 
         try {
-          // Wait longer and check multiple times
+          // Wait for event cards to load first
           await page.waitForSelector(eventSelector, { timeout: 30000 });
-          this.logger.log(`✅ Event cards found!`);
+          this.logger.log(`âœ… Event cards found!`);
 
-          // Count how many
-          const count = await page.$$eval(eventSelector, (els) => els.length);
-          this.logger.log(`📊 Found ${count} event cards`);
+          // Get initial count
+          let currentCount = await page.$$eval(
+            eventSelector,
+            (els) => els.length
+          );
+          this.logger.log(`📊 Initial count: ${currentCount} event cards`);
+
+          // Click "Show more events" button repeatedly to load all events
+          let previousCount = 0;
+          let attempts = 0;
+          const maxAttempts = 15;
+
+          this.logger.log(
+            `📄 Loading more events by clicking "Show more events"...`
+          );
+
+          while (currentCount > previousCount && attempts < maxAttempts) {
+            previousCount = currentCount;
+
+            const moreButtonClicked = await page.evaluate(() => {
+              const buttons = Array.from(document.querySelectorAll('button'));
+              const moreBtn = buttons.find(
+                (btn) => btn.textContent?.trim() === 'Show more events'
+              );
+
+              if (moreBtn) {
+                moreBtn.click();
+                return true;
+              }
+              return false;
+            });
+
+            if (moreButtonClicked) {
+              attempts++;
+              this.logger.log(
+                `🔄 Clicked "Show more events" (attempt ${attempts})`
+              );
+
+              // Wait for new events to load
+              await new Promise((resolve) => setTimeout(resolve, 5000));
+
+              currentCount = await page.$$eval(
+                eventSelector,
+                (els) => els.length
+              );
+              this.logger.log(`ðŸ“Š Now have ${currentCount} events`);
+            } else {
+              this.logger.log(`â„¹ï¸ No "Show more events" button found`);
+              break;
+            }
+          }
+
+          this.logger.log(
+            `[OK] Finished loading events. Total: ${currentCount}`
+          );
         } catch {
           this.logger.warn(
-            `⚠️ Selector ${eventSelector} not found after 30s, checking page content...`
+            `[WARNING] Selector ${eventSelector} not found after 30s, checking page content...`
           );
 
           // Debug: Check what's actually on the page
@@ -158,14 +346,14 @@ export class ScraperService {
         html = await page.content();
 
         // Debug: Log HTML length
-        this.logger.log(`📄 HTML content length: ${html.length} characters`);
+        this.logger.log(`ðŸ“„ HTML content length: ${html.length} characters`);
         const hasEventCards = html.includes('lt-agenda-event-card');
-        this.logger.log(`🔍 Contains event cards in HTML: ${hasEventCards}`);
+        this.logger.log(`ðŸ” Contains event cards in HTML: ${hasEventCards}`);
 
         await browser.close();
-        this.logger.log('✅ Puppeteer browser closed');
+        this.logger.log('âœ… Puppeteer browser closed');
       } else {
-        // 🌐 Axios ile statik HTML siteleri için
+        // ðŸŒ Axios ile statik HTML siteleri iÃ§in
         const { data } = await axios.get(url, {
           headers: {
             'User-Agent':
@@ -178,7 +366,7 @@ export class ScraperService {
       const $ = cheerio.load(html);
       const events: EventData[] = [];
 
-      // Default selectors (Culture Vevey için) - customSelectors ile override edilebilir
+      // Default selectors (Culture Vevey iÃ§in) - customSelectors ile override edilebilir
       const selectors: ScraperSelectors = {
         eventCard: '.col-event',
         title: 'h2',
@@ -190,13 +378,13 @@ export class ScraperService {
         ...customSelectors, // Custom selectors override defaults
       };
 
-      // 💡 Her etkinlik kartını scrape et
+      // ðŸ’¡ Her etkinlik kartÄ±nÄ± scrape et
       $(selectors.eventCard || '.col-event').each((_, el) => {
         const title = $(el)
           .find(selectors.title || 'h2')
           .text()
           .trim();
-        if (!title) return; // boş başlık varsa atla
+        if (!title) return; // boÅŸ baÅŸlÄ±k varsa atla
 
         const category =
           $(el)
@@ -220,7 +408,7 @@ export class ScraperService {
             .text()
             .trim() || null;
 
-        // 📍 Address + Coordinates
+        // ðŸ“ Address + Coordinates
         const mapLink = $(el)
           .find(selectors.mapLink || '.fal.fa-map-marker-alt')
           .closest('a')
@@ -245,7 +433,7 @@ export class ScraperService {
           }
         }
 
-        // 🕒 Tarih & Saat İşleme — more tolerant parsing (FR + EN)
+        // ðŸ•’ Tarih & Saat Ä°ÅŸleme â€” more tolerant parsing (FR + EN)
         let startTime: string | null = null;
         let endTime: string | null = null;
 
@@ -259,9 +447,9 @@ export class ScraperService {
           let startDate: Date | null = null;
           let endDate: Date | null = null;
 
-          // 🇬🇧 English format: "From 27.06.24 - to 04.01.26" or "From 01.01.25 - to 31.12.25"
+          // ðŸ‡¬ðŸ‡§ English format: "From 27.06.24 - to 04.01.26" or "From 01.01.25 - to 31.12.25"
           const englishDateRangeRegex =
-            /from\s+(\d{2}\.\d{2}\.\d{2,4})\s*[-–—]\s*to\s+(\d{2}\.\d{2}\.\d{2,4})/i;
+            /from\s+(\d{2}\.\d{2}\.\d{2,4})\s*[-â€“â€”]\s*to\s+(\d{2}\.\d{2}\.\d{2,4})/i;
           let m = norm.match(englishDateRangeRegex);
 
           if (m) {
@@ -287,11 +475,11 @@ export class ScraperService {
               `EN rangeMatch start="${m[1]}" end="${m[2]}" => ${startDate} - ${endDate}`
             );
           } else {
-            // 🇫🇷 French format: "du 15 novembre 2025 au 20 novembre 2025"
+            // French format: "du 15 novembre 2025 au 20 novembre 2025"
             const dateRangeRegex =
-              /du\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:au|à|jusqu(?:'| )?au|[-–—])\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
+              /du\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:au|à|jusqu(?:'| )?au|[-—–])\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
             const dateRangeNoDuRegex =
-              /(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:[-–—]|au|à)\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
+              /(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:[-—–]|au|à)\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
             const singleDateRegex = /le\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
 
             m = norm.match(dateRangeRegex) || norm.match(dateRangeNoDuRegex);
@@ -366,11 +554,13 @@ export class ScraperService {
           }
         } catch (err) {
           this.logger.warn(
-            `⚠️ Failed to parse date/time for ${title}: ${err?.message || err}`
+            `[WARNING] Failed to parse date/time for ${title}: ${
+              err?.message || err
+            }`
           );
         }
 
-        // 📦 Event objesini oluştur
+        // ðŸ“¦ Event objesini oluÅŸtur
         const event: EventData = {
           title,
           category,
@@ -387,9 +577,9 @@ export class ScraperService {
         events.push(event);
       });
 
-      this.logger.log(`✅ Extracted ${events.length} events from ${url}`);
+      this.logger.log(`âœ… Extracted ${events.length} events from ${url}`);
 
-      // 💾 Kaydet (Prisma upsert) — find-or-create Location by address to avoid unique constraint
+      // ðŸ’¾ Kaydet (Prisma upsert) â€” find-or-create Location by address to avoid unique constraint
       for (const event of events) {
         try {
           // build location relation payload: either connect to existing or create new
@@ -459,7 +649,7 @@ export class ScraperService {
               locationRelation = { connect: { id: loc.id } };
             }
           } else {
-            // no address provided — create a default location record
+            // no address provided â€” create a default location record
             locationRelation = { create: { name: 'Default Location' } };
           }
 
@@ -487,10 +677,10 @@ export class ScraperService {
           });
           // Coordinates updated at creation/find time above (no post-upsert update needed)
 
-          this.logger.log(`💾 Saved event: ${event.title}`);
+          this.logger.log(`ðŸ’¾ Saved event: ${event.title}`);
         } catch (error) {
           this.logger.error(
-            `❌ Failed to save event: ${event.title}`,
+            `âŒ Failed to save event: ${event.title}`,
             error?.message || error
           );
         }
@@ -498,12 +688,12 @@ export class ScraperService {
 
       return events;
     } catch (error) {
-      this.logger.error(`🔥 Failed to scrape ${url}: ${error.message}`);
+      this.logger.error(`ðŸ”¥ Failed to scrape ${url}: ${error.message}`);
       throw error;
     }
   }
 
-  // Çoklu URL desteği (deprecated - artık scrapeAll kullanın)
+  // Ã‡oklu URL desteÄŸi (deprecated - artÄ±k scrapeAll kullanÄ±n)
   async scrapeMany(urls: string[]): Promise<EventData[]> {
     const allEvents: EventData[] = [];
     for (const url of urls) {
