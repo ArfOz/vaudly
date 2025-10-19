@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import puppeteer from 'puppeteer';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { parse, isValid } from 'date-fns';
@@ -88,25 +89,91 @@ export class ScraperService {
     }
 
     // Selectors'ı parse et (JSON olarak saklanıyor)
-    const selectors: ScraperSelectors = (config.selectors ||
-      {}) as ScraperSelectors;
+    const selectorsData = (config.selectors || {}) as Record<string, unknown>;
+    const usePuppeteer = selectorsData.usePuppeteer === true;
 
-    return this.scrape(config.url, selectors);
+    // usePuppeteer'ı selectors'tan çıkar
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { usePuppeteer: _unused, ...selectors } = selectorsData;
+
+    return this.scrape(config.url, selectors as ScraperSelectors, usePuppeteer);
   }
-
   async scrape(
     url: string,
-    customSelectors?: ScraperSelectors
+    customSelectors?: ScraperSelectors,
+    usePuppeteer = false
   ): Promise<EventData[]> {
     this.logger.log(`🔍 Scraping started for: ${url}`);
 
     try {
-      const { data: html } = await axios.get(url, {
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-      });
+      let html: string;
+
+      // 🎭 Puppeteer ile JavaScript render'lı siteler için
+      if (usePuppeteer) {
+        this.logger.log('🎭 Using Puppeteer for JavaScript-rendered content');
+        const browser = await puppeteer.launch({
+          headless: true,
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        });
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1920, height: 1080 });
+        await page.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        );
+
+        this.logger.log(`📄 Loading ${url}...`);
+        await page.goto(url, {
+          waitUntil: 'networkidle0',
+          timeout: 90000,
+        });
+
+        // Wait for event cards to appear
+        const eventSelector =
+          customSelectors?.eventCard || '.lt-agenda-event-card';
+        this.logger.log(`⏳ Waiting for selector: ${eventSelector}`);
+
+        try {
+          // Wait longer and check multiple times
+          await page.waitForSelector(eventSelector, { timeout: 30000 });
+          this.logger.log(`✅ Event cards found!`);
+
+          // Count how many
+          const count = await page.$$eval(eventSelector, (els) => els.length);
+          this.logger.log(`📊 Found ${count} event cards`);
+        } catch {
+          this.logger.warn(
+            `⚠️ Selector ${eventSelector} not found after 30s, checking page content...`
+          );
+
+          // Debug: Check what's actually on the page
+          const bodyText = await page.evaluate(() =>
+            document.body.textContent?.substring(0, 500)
+          );
+          this.logger.debug(`Page content sample: ${bodyText}`);
+        }
+
+        // Extra wait for any lazy loading
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        html = await page.content();
+
+        // Debug: Log HTML length
+        this.logger.log(`📄 HTML content length: ${html.length} characters`);
+        const hasEventCards = html.includes('lt-agenda-event-card');
+        this.logger.log(`🔍 Contains event cards in HTML: ${hasEventCards}`);
+
+        await browser.close();
+        this.logger.log('✅ Puppeteer browser closed');
+      } else {
+        // 🌐 Axios ile statik HTML siteleri için
+        const { data } = await axios.get(url, {
+          headers: {
+            'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          },
+        });
+        html = data;
+      }
 
       const $ = cheerio.load(html);
       const events: EventData[] = [];
@@ -178,7 +245,7 @@ export class ScraperService {
           }
         }
 
-        // 🕒 Tarih & Saat İşleme — more tolerant parsing
+        // 🕒 Tarih & Saat İşleme — more tolerant parsing (FR + EN)
         let startTime: string | null = null;
         let endTime: string | null = null;
 
@@ -189,44 +256,78 @@ export class ScraperService {
             `dateText raw="${raw}" normalized="${norm}" for title="${title}"`
           );
 
-          const dateRangeRegex =
-            /du\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:au|à|jusqu(?:'| )?au|[-–—])\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
-          const dateRangeNoDuRegex =
-            /(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:[-–—]|au|à)\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
-          const singleDateRegex = /le\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
-
           let startDate: Date | null = null;
           let endDate: Date | null = null;
 
-          let m = norm.match(dateRangeRegex) || norm.match(dateRangeNoDuRegex);
-          if (m) {
-            let s = m[1];
-            let e = m[2];
-            const yearRe = /\d{4}$/;
-            if (!yearRe.test(s)) s = `${s} ${new Date().getFullYear()}`;
-            if (!yearRe.test(e)) {
-              const sy = s.match(yearRe);
-              e = `${e} ${sy ? sy[0] : new Date().getFullYear()}`;
-            }
+          // 🇬🇧 English format: "From 27.06.24 - to 04.01.26" or "From 01.01.25 - to 31.12.25"
+          const englishDateRangeRegex =
+            /from\s+(\d{2}\.\d{2}\.\d{2,4})\s*[-–—]\s*to\s+(\d{2}\.\d{2}\.\d{2,4})/i;
+          let m = norm.match(englishDateRangeRegex);
 
-            const pStart = parse(s, 'd MMMM yyyy', new Date(), { locale: fr });
-            const pEnd = parse(e, 'd MMMM yyyy', new Date(), { locale: fr });
-            if (isValid(pStart)) startDate = pStart;
-            if (isValid(pEnd)) endDate = pEnd;
+          if (m) {
+            // English date format: dd.MM.yy or dd.MM.yyyy
+            const parseEnglishDate = (dateStr: string) => {
+              const parts = dateStr.split('.');
+              if (parts.length === 3) {
+                let year = parseInt(parts[2], 10);
+                // Convert 2-digit year to 4-digit
+                if (year < 100) {
+                  year = year >= 50 ? 1900 + year : 2000 + year;
+                }
+                const month = parseInt(parts[1], 10) - 1; // 0-indexed
+                const day = parseInt(parts[0], 10);
+                return new Date(year, month, day);
+              }
+              return null;
+            };
+
+            startDate = parseEnglishDate(m[1]);
+            endDate = parseEnglishDate(m[2]);
             this.logger.debug(
-              `rangeMatch s="${s}" e="${e}" => start=${startDate} end=${endDate}`
+              `EN rangeMatch start="${m[1]}" end="${m[2]}" => ${startDate} - ${endDate}`
             );
           } else {
-            m = norm.match(singleDateRegex);
+            // 🇫🇷 French format: "du 15 novembre 2025 au 20 novembre 2025"
+            const dateRangeRegex =
+              /du\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:au|à|jusqu(?:'| )?au|[-–—])\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
+            const dateRangeNoDuRegex =
+              /(\d{1,2}\s+\w+(?:\s+\d{4})?)\s*(?:[-–—]|au|à)\s*(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
+            const singleDateRegex = /le\s+(\d{1,2}\s+\w+(?:\s+\d{4})?)/i;
+
+            m = norm.match(dateRangeRegex) || norm.match(dateRangeNoDuRegex);
             if (m) {
               let s = m[1];
-              if (!/\d{4}$/.test(s)) s = `${s} ${new Date().getFullYear()}`;
-              const p = parse(s, 'd MMMM yyyy', new Date(), { locale: fr });
-              if (isValid(p)) {
-                startDate = p;
-                endDate = p;
+              let e = m[2];
+              const yearRe = /\d{4}$/;
+              if (!yearRe.test(s)) s = `${s} ${new Date().getFullYear()}`;
+              if (!yearRe.test(e)) {
+                const sy = s.match(yearRe);
+                e = `${e} ${sy ? sy[0] : new Date().getFullYear()}`;
               }
-              this.logger.debug(`singleMatch s="${s}" => start=${startDate}`);
+
+              const pStart = parse(s, 'd MMMM yyyy', new Date(), {
+                locale: fr,
+              });
+              const pEnd = parse(e, 'd MMMM yyyy', new Date(), { locale: fr });
+              if (isValid(pStart)) startDate = pStart;
+              if (isValid(pEnd)) endDate = pEnd;
+              this.logger.debug(
+                `FR rangeMatch s="${s}" e="${e}" => start=${startDate} end=${endDate}`
+              );
+            } else {
+              m = norm.match(singleDateRegex);
+              if (m) {
+                let s = m[1];
+                if (!/\d{4}$/.test(s)) s = `${s} ${new Date().getFullYear()}`;
+                const p = parse(s, 'd MMMM yyyy', new Date(), { locale: fr });
+                if (isValid(p)) {
+                  startDate = p;
+                  endDate = p;
+                }
+                this.logger.debug(
+                  `FR singleMatch s="${s}" => start=${startDate}`
+                );
+              }
             }
           }
 
