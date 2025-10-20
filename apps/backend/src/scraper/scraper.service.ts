@@ -38,7 +38,7 @@ export class ScraperService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * TÃ¼m aktif scraper config'leri Ã§alÄ±ÅŸtÄ±r
+   * Run all active scraper configurations from the database
    */
   async scrapeAll(): Promise<EventData[]> {
     this.logger.log('ðŸš€ Starting scrapeAll from database configs...');
@@ -58,7 +58,7 @@ export class ScraperService {
         const events = await this.scrapeWithConfig(config.id);
         allEvents.push(...events);
 
-        // LastScraped gÃ¼ncelle
+        // Update lastScraped timestamp for this config
         await this.prisma.scraperConfig.update({
           where: { id: config.id },
           data: { lastScraped: new Date() },
@@ -75,7 +75,7 @@ export class ScraperService {
   }
 
   /**
-   * Belirli bir config ID'sine gÃ¶re scrape et
+   * Scrape events using a specific scraper config ID
    */
   async scrapeWithConfig(configId: string): Promise<EventData[]> {
     const config = await this.prisma.scraperConfig.findUnique({
@@ -93,15 +93,14 @@ export class ScraperService {
       return [];
     }
 
-    // ✨ Lausanne Tourism için özel scraper kullan
+    // Use specialized scraper for Lausanne Tourism
     if (config.id === 'lausanne-tourism-events') {
       this.logger.log(
         `🎯 Using specialized Lausanne Tourism scraper with Puppeteer...`
       );
       const scraper = new LausanneTourismScraper();
       const events = await scraper.scrape(config.url);
-
-      // Convert to EventData format
+      // Convert raw events to EventData format
       const eventDataArray: EventData[] = events.map((event) => ({
         title: event.title,
         category: event.category,
@@ -114,11 +113,9 @@ export class ScraperService {
         startTime: event.startTime?.toISOString() || null,
         endTime: event.endTime?.toISOString() || null,
       }));
-
-      // 💾 Database'e kaydet (Culture Vevey gibi)
+      // Save each event to the database (same as Culture Vevey logic)
       for (const event of eventDataArray) {
         try {
-          // Location relation: find or create
           let locationRelation:
             | Prisma.ActivityCreateInput['location']
             | Prisma.ActivityUpdateInput['location'];
@@ -150,7 +147,7 @@ export class ScraperService {
                 }
               }
             } else {
-              // Update coordinates if provided
+              // Update coordinates if provided and changed
               const needUpdate =
                 (event.latitude != null && loc.latitude !== event.latitude) ||
                 (event.longitude != null && loc.longitude !== event.longitude);
@@ -215,15 +212,138 @@ export class ScraperService {
           );
         }
       }
-
       return eventDataArray;
     }
 
-    // Selectors'ı parse et (JSON olarak saklanıyor)
+    // Use specialized scraper for Yverdon-les-Bains
+    if (config.id === 'yverdon-les-bains-events') {
+      this.logger.log(
+        `🎯 Using specialized Yverdon-les-Bains scraper (API)...`
+      );
+      // Dynamically import the Yverdon-les-Bains scraper function
+      const { scrapeYverdonEvents } = await import(
+        './scrapers/yverdon-les-bains.scraper'
+      );
+      // Fetch all events from all pages, using parallelized detail requests
+      const events = await scrapeYverdonEvents();
+
+      // Convert raw events to EventData format
+      const eventDataArray: EventData[] = events.map((event) => ({
+        title: event.title,
+        description: event.details?.description || '',
+        date: event.starts_at || '',
+        price: null,
+        address: event.details?.location_details || event.address || '',
+        latitude: event.latitude ?? null,
+        longitude: event.longitude ?? null,
+        startTime: event.starts_at || null,
+        endTime: event.ends_at || null,
+      }));
+
+      // Save each event to the database
+      for (const event of eventDataArray) {
+        try {
+          let locationRelation:
+            | Prisma.ActivityCreateInput['location']
+            | Prisma.ActivityUpdateInput['location'];
+
+          if (event.address) {
+            let loc = await this.prisma.location.findFirst({
+              where: { address: event.address },
+            });
+            if (!loc) {
+              try {
+                loc = await this.prisma.location.create({
+                  data: {
+                    name: event.address || 'Default Location',
+                    address: event.address,
+                    latitude: event.latitude,
+                    longitude: event.longitude,
+                  },
+                });
+              } catch (err) {
+                if (
+                  err instanceof Prisma.PrismaClientKnownRequestError &&
+                  err.code === 'P2002'
+                ) {
+                  loc = await this.prisma.location.findFirst({
+                    where: { address: event.address },
+                  });
+                } else {
+                  throw err;
+                }
+              }
+            } else {
+              const needUpdate =
+                (event.latitude != null && loc.latitude !== event.latitude) ||
+                (event.longitude != null && loc.longitude !== event.longitude);
+              if (needUpdate) {
+                await this.prisma.location.update({
+                  where: { id: loc.id },
+                  data: {
+                    ...(event.latitude != null
+                      ? { latitude: event.latitude }
+                      : {}),
+                    ...(event.longitude != null
+                      ? { longitude: event.longitude }
+                      : {}),
+                  },
+                });
+              }
+            }
+            if (!loc) {
+              const created = await this.prisma.location.create({
+                data: {
+                  name: event.address || 'Default Location',
+                  address: event.address,
+                },
+              });
+              locationRelation = { connect: { id: created.id } };
+            } else {
+              locationRelation = { connect: { id: loc.id } };
+            }
+          } else {
+            locationRelation = { create: { name: 'Default Location' } };
+          }
+
+          await this.prisma.activity.upsert({
+            where: { name: event.title },
+            update: {
+              description: event.description,
+              category: undefined,
+              date: event.date,
+              price: event.price,
+              startTime: event.startTime ? new Date(event.startTime) : null,
+              endTime: event.endTime ? new Date(event.endTime) : null,
+              location: locationRelation,
+            },
+            create: {
+              name: event.title,
+              description: event.description,
+              category: undefined,
+              date: event.date,
+              price: event.price,
+              startTime: event.startTime ? new Date(event.startTime) : null,
+              endTime: event.endTime ? new Date(event.endTime) : null,
+              location: locationRelation,
+            },
+          });
+          this.logger.log(`💾 Saved event: ${event.title}`);
+        } catch (error) {
+          this.logger.error(
+            `❌ Failed to save event: ${event.title}`,
+            error?.message || error
+          );
+        }
+      }
+      return eventDataArray;
+    }
+
+    // Parse selectors (stored as JSON in the config)
     const selectorsData = (config.selectors || {}) as Record<string, unknown>;
     const usePuppeteer = selectorsData.usePuppeteer === true;
 
-    // usePuppeteer'Ä± selectors'tan Ã§Ä±kar
+    // Remove usePuppeteer from selectors (not needed for scraping)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { usePuppeteer: _unused, ...selectors } = selectorsData;
 
@@ -239,7 +359,7 @@ export class ScraperService {
     try {
       let html: string;
 
-      // ðŸŽ­ Puppeteer ile JavaScript render'lÄ± siteler iÃ§in
+      // Use Puppeteer for JavaScript-rendered sites
       if (usePuppeteer) {
         this.logger.log('ðŸŽ­ Using Puppeteer for JavaScript-rendered content');
         const browser = await puppeteer.launch({
@@ -258,12 +378,12 @@ export class ScraperService {
           timeout: 90000,
         });
 
-        // Don't try to click Today button - it doesn't respond to programmatic clicks
+        // Do not try to click the Today button - it does not respond to programmatic clicks
         // Instead, just wait and try to load more events with "Show more events"
         this.logger.log(`⏳ Waiting for page to fully load...`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Wait for event cards to appear
+        // Wait for event cards to appear on the page
         const eventSelector =
           customSelectors?.eventCard || '.lt-agenda-event-card';
         this.logger.log(`â³ Waiting for selector: ${eventSelector}`);
@@ -273,7 +393,7 @@ export class ScraperService {
           await page.waitForSelector(eventSelector, { timeout: 30000 });
           this.logger.log(`âœ… Event cards found!`);
 
-          // Get initial count
+          // Get initial count of event cards
           let currentCount = await page.$$eval(
             eventSelector,
             (els) => els.length
@@ -311,7 +431,7 @@ export class ScraperService {
                 `🔄 Clicked "Show more events" (attempt ${attempts})`
               );
 
-              // Wait for new events to load
+              // Wait for new events to load after clicking
               await new Promise((resolve) => setTimeout(resolve, 5000));
 
               currentCount = await page.$$eval(
@@ -333,19 +453,19 @@ export class ScraperService {
             `[WARNING] Selector ${eventSelector} not found after 30s, checking page content...`
           );
 
-          // Debug: Check what's actually on the page
+          // Debug: Check what is actually on the page if selector is not found
           const bodyText = await page.evaluate(() =>
             document.body.textContent?.substring(0, 500)
           );
           this.logger.debug(`Page content sample: ${bodyText}`);
         }
 
-        // Extra wait for any lazy loading
+        // Extra wait for any lazy loading after all events are loaded
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
         html = await page.content();
 
-        // Debug: Log HTML length
+        // Debug: Log HTML content length
         this.logger.log(`ðŸ“„ HTML content length: ${html.length} characters`);
         const hasEventCards = html.includes('lt-agenda-event-card');
         this.logger.log(`ðŸ” Contains event cards in HTML: ${hasEventCards}`);
@@ -353,7 +473,7 @@ export class ScraperService {
         await browser.close();
         this.logger.log('âœ… Puppeteer browser closed');
       } else {
-        // ðŸŒ Axios ile statik HTML siteleri iÃ§in
+        // Use Axios for static HTML sites
         const { data } = await axios.get(url, {
           headers: {
             'User-Agent':
@@ -366,7 +486,7 @@ export class ScraperService {
       const $ = cheerio.load(html);
       const events: EventData[] = [];
 
-      // Default selectors (Culture Vevey iÃ§in) - customSelectors ile override edilebilir
+      // Default selectors (for Culture Vevey) - can be overridden by customSelectors
       const selectors: ScraperSelectors = {
         eventCard: '.col-event',
         title: 'h2',
@@ -378,13 +498,13 @@ export class ScraperService {
         ...customSelectors, // Custom selectors override defaults
       };
 
-      // ðŸ’¡ Her etkinlik kartÄ±nÄ± scrape et
+      // Scrape each event card
       $(selectors.eventCard || '.col-event').each((_, el) => {
         const title = $(el)
           .find(selectors.title || 'h2')
           .text()
           .trim();
-        if (!title) return; // boÅŸ baÅŸlÄ±k varsa atla
+        if (!title) return; // Skip if title is empty
 
         const category =
           $(el)
@@ -408,7 +528,7 @@ export class ScraperService {
             .text()
             .trim() || null;
 
-        // ðŸ“ Address + Coordinates
+        // Extract address and coordinates
         const mapLink = $(el)
           .find(selectors.mapLink || '.fal.fa-map-marker-alt')
           .closest('a')
@@ -433,7 +553,7 @@ export class ScraperService {
           }
         }
 
-        // ðŸ•’ Tarih & Saat Ä°ÅŸleme â€” more tolerant parsing (FR + EN)
+        // Date & Time parsing — tolerant for both FR and EN formats
         let startTime: string | null = null;
         let endTime: string | null = null;
 
@@ -447,7 +567,7 @@ export class ScraperService {
           let startDate: Date | null = null;
           let endDate: Date | null = null;
 
-          // ðŸ‡¬ðŸ‡§ English format: "From 27.06.24 - to 04.01.26" or "From 01.01.25 - to 31.12.25"
+          // English format: "From 27.06.24 - to 04.01.26" or "From 01.01.25 - to 31.12.25"
           const englishDateRangeRegex =
             /from\s+(\d{2}\.\d{2}\.\d{2,4})\s*[-â€“â€”]\s*to\s+(\d{2}\.\d{2}\.\d{2,4})/i;
           let m = norm.match(englishDateRangeRegex);
@@ -560,7 +680,7 @@ export class ScraperService {
           );
         }
 
-        // ðŸ“¦ Event objesini oluÅŸtur
+        // Create the event object
         const event: EventData = {
           title,
           category,
@@ -579,10 +699,10 @@ export class ScraperService {
 
       this.logger.log(`âœ… Extracted ${events.length} events from ${url}`);
 
-      // ðŸ’¾ Kaydet (Prisma upsert) â€” find-or-create Location by address to avoid unique constraint
+      // Save event to database (Prisma upsert) — find-or-create Location by address to avoid unique constraint
       for (const event of events) {
         try {
-          // build location relation payload: either connect to existing or create new
+          // Build location relation payload: either connect to existing or create new
           let locationRelation:
             | Prisma.ActivityCreateInput['location']
             | Prisma.ActivityUpdateInput['location'];
@@ -603,7 +723,7 @@ export class ScraperService {
                   },
                 });
               } catch (err) {
-                // Handle race where another process created the same address
+                // Handle race condition where another process created the same address
                 if (
                   err instanceof Prisma.PrismaClientKnownRequestError &&
                   err.code === 'P2002'
@@ -616,7 +736,7 @@ export class ScraperService {
                 }
               }
             } else {
-              // update coordinates if provided and changed
+              // Update coordinates if provided and changed
               const needUpdate =
                 (event.latitude != null && loc.latitude !== event.latitude) ||
                 (event.longitude != null && loc.longitude !== event.longitude);
@@ -635,7 +755,7 @@ export class ScraperService {
               }
             }
 
-            // At this point loc should exist
+            // At this point, location should exist
             if (!loc) {
               // Fallback: if something went wrong, create a minimal connected location
               const created = await this.prisma.location.create({
@@ -649,7 +769,7 @@ export class ScraperService {
               locationRelation = { connect: { id: loc.id } };
             }
           } else {
-            // no address provided â€” create a default location record
+            // No address provided — create a default location record
             locationRelation = { create: { name: 'Default Location' } };
           }
 
@@ -693,7 +813,7 @@ export class ScraperService {
     }
   }
 
-  // Ã‡oklu URL desteÄŸi (deprecated - artÄ±k scrapeAll kullanÄ±n)
+  // Multiple URL support (deprecated - use scrapeAll instead)
   async scrapeMany(urls: string[]): Promise<EventData[]> {
     const allEvents: EventData[] = [];
     for (const url of urls) {
