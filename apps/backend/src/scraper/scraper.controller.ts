@@ -14,6 +14,10 @@ class ScrapeDto {
   urls?: string[];
 }
 
+class ScrapeConfigsDto {
+  ids: string[];
+}
+
 @Controller('scrape')
 export class ScraperController {
   constructor(
@@ -53,6 +57,26 @@ export class ScraperController {
   @Post('config/:id')
   async scrapeConfig(@Param('id') id: string) {
     return this.scraper.scrapeWithConfig(id);
+  }
+
+  /**
+   * POST /api/scrape/configs - Array ile birden fazla config ID scrape et
+   */
+  @Post('configs')
+  async scrapeConfigs(@Body() body: ScrapeConfigsDto) {
+    if (!Array.isArray(body.ids) || body.ids.length === 0) {
+      throw new BadRequestException('Body must contain non-empty "ids" array');
+    }
+    const allEvents = [];
+    for (const id of body.ids) {
+      try {
+        const events = await this.scraper.scrapeWithConfig(id);
+        allEvents.push(...events);
+      } catch (err) {
+        // Log error but continue with others
+      }
+    }
+    return allEvents;
   }
 
   /**
