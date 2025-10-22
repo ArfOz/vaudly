@@ -225,18 +225,139 @@ export class ScraperService {
       );
       const events = await scrapeMontreuxRivieraEvents();
       // Convert raw events to EventData format
-      const eventDataArray: EventData[] = events.map((event) => ({
-        title: event.title,
-        description: event.details?.description || '',
-        date: event.starts_at || '',
-        price: null,
-        address: event.address || '',
-        latitude: event.latitude ?? null,
-        longitude: event.longitude ?? null,
-        startTime: event.starts_at || null,
-        endTime: event.ends_at || null,
-      }));
-      // (Opsiyonel) DB'ye kaydetme işlemi eklenebilir, Yverdon ile aynı mantıkta
+      const eventDataArray: EventData[] = events.map((event) => {
+        // Try to parse event.date to a valid Date object
+        let parsedDate: Date | null = null;
+        if (event.date) {
+          // Try to parse formats like "20 - 24 octobre 2025" or "5 octobre - 30 novembre 2025"
+          const rangeMatch = event.date.match(
+            /(\d{1,2})\s*-\s*(\d{1,2})\s*(\w+)\s*(\d{4})/
+          );
+          if (rangeMatch) {
+            // e.g. "20 - 24 octobre 2025" => 20 octobre 2025
+            const day = rangeMatch[1];
+            const month = rangeMatch[3];
+            const year = rangeMatch[4];
+            const dateStr = `${day} ${month} ${year}`;
+            parsedDate = new Date(Date.parse(dateStr));
+          } else {
+            // Try to parse single date like "24 octobre 2025"
+            const singleMatch = event.date.match(/(\d{1,2})\s*(\w+)\s*(\d{4})/);
+            if (singleMatch) {
+              const day = singleMatch[1];
+              const month = singleMatch[2];
+              const year = singleMatch[3];
+              const dateStr = `${day} ${month} ${year}`;
+              parsedDate = new Date(Date.parse(dateStr));
+            }
+          }
+        }
+        if (parsedDate && !isNaN(parsedDate.getTime())) {
+          return {
+            title: event.title,
+            description: '',
+            date: event.date || '',
+            price: null,
+            address: event.city || '',
+            latitude: null,
+            longitude: null,
+            startTime: parsedDate.toISOString(),
+            endTime: null,
+          };
+        } else {
+          return {
+            title: event.title,
+            description: '',
+            date: event.date || '',
+            price: null,
+            address: event.city || '',
+            latitude: null,
+            longitude: null,
+            startTime: null,
+            endTime: null,
+          };
+        }
+      });
+
+      // Save each event to the database
+      for (const event of eventDataArray) {
+        try {
+          let locationRelation:
+            | Prisma.ActivityCreateInput['location']
+            | Prisma.ActivityUpdateInput['location'];
+
+          if (event.address) {
+            let loc = await this.prisma.location.findFirst({
+              where: { address: event.address },
+            });
+            if (!loc) {
+              try {
+                loc = await this.prisma.location.create({
+                  data: {
+                    name: event.address || 'Default Location',
+                    address: event.address,
+                  },
+                });
+              } catch (err) {
+                if (
+                  err instanceof Prisma.PrismaClientKnownRequestError &&
+                  err.code === 'P2002'
+                ) {
+                  loc = await this.prisma.location.findFirst({
+                    where: { address: event.address },
+                  });
+                } else {
+                  throw err;
+                }
+              }
+            }
+            locationRelation = { connect: { id: loc.id } };
+          } else {
+            locationRelation = { create: { name: 'Default Location' } };
+          }
+
+          await this.prisma.activity.upsert({
+            where: { name: event.title },
+            update: {
+              description: event.description,
+              category: undefined,
+              date: event.date,
+              price: event.price,
+              startTime:
+                event.startTime && !isNaN(Date.parse(event.startTime))
+                  ? new Date(event.startTime)
+                  : null,
+              endTime:
+                event.endTime && !isNaN(Date.parse(event.endTime))
+                  ? new Date(event.endTime)
+                  : null,
+              location: locationRelation,
+            },
+            create: {
+              name: event.title,
+              description: event.description,
+              category: undefined,
+              date: event.date,
+              price: event.price,
+              startTime:
+                event.startTime && !isNaN(Date.parse(event.startTime))
+                  ? new Date(event.startTime)
+                  : null,
+              endTime:
+                event.endTime && !isNaN(Date.parse(event.endTime))
+                  ? new Date(event.endTime)
+                  : null,
+              location: locationRelation,
+            },
+          });
+          this.logger.log(`💾 Saved event: ${event.title}`);
+        } catch (error) {
+          this.logger.error(
+            `❌ Failed to save event: ${event.title}`,
+            error?.message || error
+          );
+        }
+      }
       return eventDataArray;
     }
     // Use specialized scraper for Yverdon-les-Bains
