@@ -215,6 +215,30 @@ export class ScraperService {
       return eventDataArray;
     }
 
+    // Use specialized scraper for Montreux Riviera
+    if (config.id === 'montreux-riviera-events') {
+      this.logger.log(
+        `🎯 Using specialized Montreux Riviera scraper (HTML)...`
+      );
+      const { scrapeMontreuxRivieraEvents } = await import(
+        './scrapers/montreux-riviera.scraper'
+      );
+      const events = await scrapeMontreuxRivieraEvents();
+      // Convert raw events to EventData format
+      const eventDataArray: EventData[] = events.map((event) => ({
+        title: event.title,
+        description: event.details?.description || '',
+        date: event.starts_at || '',
+        price: null,
+        address: event.address || '',
+        latitude: event.latitude ?? null,
+        longitude: event.longitude ?? null,
+        startTime: event.starts_at || null,
+        endTime: event.ends_at || null,
+      }));
+      // (Opsiyonel) DB'ye kaydetme işlemi eklenebilir, Yverdon ile aynı mantıkta
+      return eventDataArray;
+    }
     // Use specialized scraper for Yverdon-les-Bains
     if (config.id === 'yverdon-les-bains-events') {
       this.logger.log(
