@@ -58,6 +58,10 @@ npm-debug.*
 web-build/
 cache/
 
+# Expo prebuild native folders (managed workflow)
+apps/mobile/android/
+apps/mobile/ios/
+
 # Environment files
 .env
 .env.local
