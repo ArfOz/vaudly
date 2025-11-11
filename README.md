@@ -9,6 +9,43 @@
 
 To start the development server run `nx serve backend`. Open your browser and navigate to http://localhost:4200/. Happy coding!
 
+## Manual activities API (no scrapers)
+
+The scraper subsystem has been removed. Use these endpoints to manage activities manually:
+
+- GET `/activities` — list latest activities (includes location)
+- GET `/activities/:id` — get one activity
+- POST `/activities` — create activity
+- PUT `/activities/:id` — update activity
+- DELETE `/activities/:id` — delete activity
+
+POST/PUT body fields:
+
+```
+{
+	"name": "Activity title",              // required on POST
+	"description": "...",                 // optional
+	"category": "...",                    // optional
+	"subtitle": "...",                    // optional
+	"date": "free text date",            // optional
+	"price": "...",                       // optional
+	"startTime": "2025-11-20T10:00:00Z", // optional ISO
+	"endTime":   "2025-11-20T12:00:00Z", // optional ISO
+
+	// Location: either connect or create
+	"locationId": "<existing-id>",        // prefer this when available
+	"address": "...",                     // or provide address/city to create
+	"city": "...",
+	"latitude": 46.5197,
+	"longitude": 6.6323
+}
+```
+
+Notes:
+- If `locationId` is provided, the activity will connect to that location.
+- If `address`/`city` is provided and the address exists, it connects; otherwise, it creates a new location.
+- `startTime`/`endTime` are parsed as Date from ISO strings; omit or set null to clear.
+
 
 ## Generate code
 
