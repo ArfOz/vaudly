@@ -3,36 +3,22 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "eas-build-post-install": "cd ../../ && node tools/scripts/eas-build-post-install.mjs . apps/mobile",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "eas-build-post-install": "cd ../../ && node tools/scripts/eas-build-post-install.mjs . apps/mobile"
   },
   "dependencies": {
-    "@expo/metro-config": "54.0.5",
-    "@testing-library/react-native": "~13.2.0",
-    "expo": "~54.0.0",
-    "expo-splash-screen": "31.0.10",
-    "expo-status-bar": "3.0.8",
-    "expo-system-ui": "6.0.7",
-    "jest-expo": "~54.0.0",
-    "metro-config": "~0.83.0",
-    "metro-resolver": "~0.83.0",
-    "react": "19.1.0",
-    "react-native": "0.81.4",
-    "react-native-svg": "~15.11.2",
-    "react-native-svg-transformer": "~1.5.1",
-    "react-native-web": "~0.20.0",
-    "@nx/jest": "*",
-    "@nx/devkit": "*",
-    "@nx/eslint": "*",
-    "@nx/js": "*",
-    "@nx/react": "*",
-    "enhanced-resolve": "*",
-    "picocolors": "*",
-    "tsconfig-paths": "*",
-    "tslib": "*",
-    "@nx/detox": "*",
-    "@nx/rollup": "*"
-  },
-  "devDependencies": {}
+    "@expo/metro-config": "*",
+    "@testing-library/react-native": "*",
+    "expo": "*",
+    "expo-splash-screen": "*",
+    "expo-status-bar": "*",
+    "expo-system-ui": "*",
+    "jest-expo": "*",
+    "metro-config": "*",
+    "metro-resolver": "*",
+    "react": "*",
+    "react-native": "*",
+    "react-native-svg": "*",
+    "react-native-svg-transformer": "*",
+    "react-native-web": "*"
+  }
 }

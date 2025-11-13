@@ -14,11 +14,7 @@
     "**/*.spec.js",
     "**/*.test.jsx",
     "**/*.spec.jsx",
-    "src/test-setup.ts",
-    "jest.config.ts",
-    "src/**/*.spec.ts",
-    "src/**/*.test.ts",
-    "jest.resolver.js"
+    "src/test-setup.ts"
   ],
   "include": [
     "**/*.ts",
