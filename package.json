@@ -38,6 +38,7 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
+    "@babel/plugin-syntax-flow": "^7.27.1",
     "@expo/cli": "~0.24.14",
     "@nestjs/schematics": "11.0.0",
     "@nestjs/testing": "^10.0.2",
