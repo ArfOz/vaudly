@@ -20,11 +20,6 @@
     },
     "e2e": {
       "cache": true
-    },
-    "@nx/expo:build": {
-      "cache": true,
-      "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
@@ -42,22 +37,5 @@
   },
   "nxCloudAccessToken": "ZjVjMzEwZTctZTI0Ny00NGYyLTljODItYTVjMmU3NjU5MjY1fHJlYWQtd3JpdGU=",
   "useInferencePlugins": false,
-  "defaultBase": "master",
-
-  "plugins": [
-    {
-      "plugin": "@nx/expo/plugin",
-      "options": {
-        "startTargetName": "start",
-        "serveTargetName": "serve",
-        "runIosTargetName": "run-ios",
-        "runAndroidTargetName": "run-android",
-        "exportTargetName": "export",
-        "prebuildTargetName": "prebuild",
-        "installTargetName": "install",
-        "buildTargetName": "build",
-        "submitTargetName": "submit"
-      }
-    }
-  ]
+  "defaultBase": "master"
 }
