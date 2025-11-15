@@ -8,68 +8,55 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
+import { CreateActivityDto } from './dtos/actvities.dto';
 
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
   @Get()
-  list() {
-    return this.activities.list();
+  async list() {
+    return await this.activities.listActivities();
   }
 
   @Get(':id')
-  get(@Param('id') id: string) {
-    return this.activities.findById(id);
+  async get(@Param('id') id: string) {
+    return await this.activities.findById(id);
   }
 
   @Post()
-  create(
+  async create(
     @Body()
-    body: {
-      name: string;
-      description?: string | null;
-      category?: string | null;
-      subtitle?: string | null;
-      date?: string | null;
-      price?: string | null;
-      startTime?: string | null; // ISO string
-      endTime?: string | null; // ISO string
-      locationId?: string;
-      address?: string | null;
-      city?: string | null;
-      latitude?: number | null;
-      longitude?: number | null;
-    }
+    body: CreateActivityDto
   ) {
-    return this.activities.create(body);
+    return await this.activities.create(body);
   }
 
-  @Put(':id')
-  update(
-    @Param('id') id: string,
-    @Body()
-    body: {
-      name?: string;
-      description?: string | null;
-      category?: string | null;
-      subtitle?: string | null;
-      date?: string | null;
-      price?: string | null;
-      startTime?: string | null;
-      endTime?: string | null;
-      locationId?: string | null;
-      address?: string | null;
-      city?: string | null;
-      latitude?: number | null;
-      longitude?: number | null;
-    }
-  ) {
-    return this.activities.update(id, body);
-  }
+  // @Put(':id')
+  // async update(
+  //   @Param('id') id: string,
+  //   @Body()
+  //   body: {
+  //     name?: string;
+  //     description?: string | null;
+  //     category?: string | null;
+  //     subtitle?: string | null;
+  //     date?: string | null;
+  //     price?: string | null;
+  //     startTime?: string | null;
+  //     endTime?: string | null;
+  //     locationId?: string | null;
+  //     address?: string | null;
+  //     city?: string | null;
+  //     latitude?: number | null;
+  //     longitude?: number | null;
+  //   }
+  // ) {
+  //   return await this.activities.update(id, body);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.activities.remove(id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return await this.activities.remove(id);
+  // }
 }
