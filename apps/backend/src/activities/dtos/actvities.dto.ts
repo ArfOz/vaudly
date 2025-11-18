@@ -61,3 +61,31 @@ export class CreateActivityDto {
   @IsOptional()
   longitude?: number;
 }
+
+export interface Location {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  canton: string;
+  latitude: number;
+  longitude: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ActivityResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  subtitle: string | null;
+  date: string | null;
+  price: string | null;
+  startTime: Date | null;
+  endTime: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  locationId: string;
+  location: Location;
+}

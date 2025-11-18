@@ -8,14 +8,14 @@ import {
   Delete,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
-import { CreateActivityDto } from './dtos/actvities.dto';
+import { ActivityResponse, CreateActivityDto } from './dtos/actvities.dto';
 
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
   @Get()
-  async list() {
+  async list(): Promise<ActivityResponse[]> {
     return await this.activities.listActivities();
   }
 

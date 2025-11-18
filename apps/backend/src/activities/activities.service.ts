@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ActivitiesDatabaseService } from '@libs/database';
-import { CreateActivityDto } from './dtos';
+import { ActivitiesDatabaseService } from '../../../../libs/database/src/index';
+import { ActivityResponse, CreateActivityDto } from './dtos';
 
 @Injectable()
 export class ActivitiesService {
@@ -8,14 +8,14 @@ export class ActivitiesService {
     private readonly activitiesDatabaseService: ActivitiesDatabaseService
   ) {}
 
-  async listActivities() {
-    return this.activitiesDatabaseService.list();
+  async listActivities(): Promise<ActivityResponse[]> {
+    return await this.activitiesDatabaseService.list();
   }
   async findById(id: string) {
-    return this.activitiesDatabaseService.findById(id);
+    return await this.activitiesDatabaseService.findById(id);
   }
   async create(input: CreateActivityDto) {
-    return this.activitiesDatabaseService.create(input);
+    return await this.activitiesDatabaseService.create(input);
   }
   async update(
     id: string,
@@ -35,7 +35,7 @@ export class ActivitiesService {
       longitude?: number | null;
     }
   ) {
-    return this.activitiesDatabaseService.update(id, input);
+    return await this.activitiesDatabaseService.update(id, input);
   }
 
   // async delete(id: string) {

@@ -1,14 +1,18 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "./dist",
     "module": "commonjs",
     "types": ["node"],
     "emitDecoratorMetadata": true,
     "target": "es2021",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@libs/database": ["../../libs/database/src/index.ts"]
+    }
   },
   "exclude": [
     "jest.config.ts",

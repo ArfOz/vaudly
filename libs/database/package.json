@@ -1,12 +1,21 @@
 {
   "name": "@libs/database",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "type": "commonjs",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.lib.json",
+    "prisma:generate": "prisma generate --schema=src/prisma/schema.prisma",
+    "prisma:db-push": "prisma db push --schema=src/prisma/schema.prisma && prisma generate --schema=src/prisma/schema.prisma",
+    "prisma:migrate": "prisma migrate dev --schema=src/prisma/schema.prisma"
+  },
   "dependencies": {
     "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
   },
   "peerDependencies": {
     "@nestjs/common": "^10.0.0",
