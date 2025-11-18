@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "expo/tsconfig.base",
+    "@repo/typescript-config/react-library.json"
+  ],
+  "compilerOptions": {
+    "strict": true
+  }
+}
