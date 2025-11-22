@@ -1,0 +1,32 @@
+{
+  "name": "monorepo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "packageManager": "npm@11.3.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:backend": "npm --workspace backend run start:dev",
+    "dev:mobile": "npm --workspace mobile start",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "turbo": "^2.6.1",
+    "typescript": "^5.9.3"
+  },
+  "paths": {
+    "@shared/*": [
+      "packages/shared/*"
+    ]
+  }
+}
