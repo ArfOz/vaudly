@@ -11,15 +11,22 @@
   "scripts": {
     "build": "tsc",
     "prisma:generate": "prisma generate",
+    "prisma:seed": "tsx prisma/seed.ts",
     "generate:all": "npm run prisma:generate",
     "start": "node dist/index.js"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "devDependencies": {
+    "@types/pg": "^8.15.6",
     "prisma": "^7.0.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.0.0",
     "@prisma/client": "^7.0.0",
-    "dotenv": "^16.4.7"
+    "dotenv": "^16.4.7",
+    "pg": "^8.16.3"
   }
 }

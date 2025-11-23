@@ -1,3 +1,4 @@
+import { Category } from "./../../database/generated/client/index.d";
 export interface Location {
   id: string;
   name: string | null;
@@ -14,7 +15,7 @@ export interface ActivityResponse {
   id: string;
   name: string;
   description: string | null;
-  category: string | null;
+  category: [string | null];
   subtitle: string | null;
   date: string | null;
   price: string | null;
@@ -24,6 +25,7 @@ export interface ActivityResponse {
   updatedAt: Date;
   locationId: string;
   location: Location;
+  categories: Category[];
 }
 
 export interface CreateActivityDto {
