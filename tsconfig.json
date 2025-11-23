@@ -5,8 +5,10 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["packages/shared/*"],
-      "@shared": ["packages/shared/index.ts"]
+      "database/*": ["packages/database/*"],
+      "database": ["packages/database/index.ts"],
+      "shared": ["packages/shared/src/index.ts"],
+      "shared/*": ["packages/shared/src/*"]
     },
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
