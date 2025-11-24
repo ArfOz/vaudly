@@ -4,7 +4,7 @@ export interface Location {
   name: string | null;
   address: string | null;
   city: string | null;
-  canton: string | null;
+  canton: string;
   latitude: number | null;
   longitude: number | null;
   createdAt: Date;
@@ -15,7 +15,6 @@ export interface ActivityResponse {
   id: string;
   name: string;
   description: string | null;
-  category: [string | null];
   subtitle: string | null;
   date: string | null;
   price: string | null;
@@ -25,7 +24,7 @@ export interface ActivityResponse {
   updatedAt: Date;
   locationId: string;
   location: Location;
-  categories: Category[];
+  categoryNames: string[];
 }
 
 export interface CreateActivityDto {
