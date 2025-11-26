@@ -79,22 +79,22 @@ model Location {
 }
 
 model Activity {
-  id            String             @id @default(cuid())
-  name          String             @unique
-  description   String?
-  subtitle      String?
-  date          String?
-  price         String?
-  categoryNames String[]           @default([])
-  startTime     DateTime?
-  endTime       DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  subtitle    String?
+  date        String?
+  price       String?
+  category    String[]  @default([])
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   locationId String
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@index([startTime])
   @@index([locationId])
-  @@index([categoryNames])
+  @@index([category])
 }

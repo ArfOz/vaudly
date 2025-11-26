@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  ScrollView,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import type { ActivityResponse } from "shared";
@@ -15,6 +16,52 @@ import { useRouter } from "expo-router";
 
 const { height } = Dimensions.get("window");
 
+const CATEGORIES = [
+  "FARM",
+  "GARDEN",
+  "RESTAURANT",
+  "CAFE",
+  "BAR",
+  "MARKET",
+  "SPORTS",
+  "CULTURE",
+  "NATURE",
+  "ENTERTAINMENT",
+  "EDUCATION",
+  "WELLNESS",
+  "FAMILY",
+  "ADVENTURE",
+  "MUSIC",
+  "ART",
+  "FESTIVAL",
+  "SHOPPING",
+  "NIGHTLIFE",
+  "OTHER",
+] as const;
+
+const CATEGORY_LABELS: Record<string, string> = {
+  FARM: "🌾 Ferme",
+  GARDEN: "🌿 Jardin",
+  RESTAURANT: "🍽️ Restaurant",
+  CAFE: "☕ Café",
+  BAR: "🍺 Bar",
+  MARKET: "🛒 Marché",
+  SPORTS: "⚽ Sport",
+  CULTURE: "🎭 Culture",
+  NATURE: "🏞️ Nature",
+  ENTERTAINMENT: "🎪 Divertissement",
+  EDUCATION: "📚 Éducation",
+  WELLNESS: "💆 Bien-être",
+  FAMILY: "👨‍👩‍👧‍👦 Famille",
+  ADVENTURE: "🧗 Aventure",
+  MUSIC: "🎵 Musique",
+  ART: "🎨 Art",
+  FESTIVAL: "🎉 Festival",
+  SHOPPING: "🛍️ Shopping",
+  NIGHTLIFE: "🌙 Vie nocturne",
+  OTHER: "📌 Autre",
+};
+
 export default function HomeScreen() {
   const router = useRouter();
   const [activities, setActivities] = useState<ActivityResponse[]>([]);
@@ -22,6 +69,8 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
@@ -42,7 +91,26 @@ export default function HomeScreen() {
     }
   };
 
-  const validMarkers = activities.filter(
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category],
+    );
+  };
+
+  const clearFilters = () => {
+    setSelectedCategories([]);
+  };
+
+  const filteredActivities =
+    selectedCategories.length === 0
+      ? activities
+      : activities.filter((activity) =>
+          activity.category?.some((cat) => selectedCategories.includes(cat)),
+        );
+
+  const validMarkers = filteredActivities.filter(
     (activity) =>
       activity.location.latitude !== null &&
       activity.location.longitude !== null,
@@ -97,10 +165,10 @@ export default function HomeScreen() {
             >
               {item.name}
             </Text>
-            {item.categoryNames && item.categoryNames.length > 0 && (
+            {item.category && item.category.length > 0 && (
               <View className="bg-blue-100 px-3 py-1 rounded-xl">
                 <Text className="text-xs font-semibold text-blue-600">
-                  {item.categoryNames[0]}
+                  {item.category[0]}
                 </Text>
               </View>
             )}
@@ -198,21 +266,83 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* Toggle Button */}
-      <TouchableOpacity
-        className="absolute top-[120px] right-4 z-20 bg-white rounded-3xl px-4 py-3 flex-row items-center gap-2 shadow-lg"
-        onPress={() => setViewMode(viewMode === "map" ? "list" : "map")}
-        activeOpacity={0.8}
-      >
-        <Text className="text-base font-semibold text-gray-800">
-          {viewMode === "map" ? "📋 Liste" : "🗺️ Carte"}
-        </Text>
-        <View className="bg-blue-600 px-2 py-0.5 rounded-xl">
-          <Text className="text-white text-xs font-bold">
-            {activities.length}
+      {/* Action Buttons */}
+      <View className="absolute top-[120px] right-4 z-20 flex-col gap-2">
+        <TouchableOpacity
+          className="bg-white rounded-3xl px-4 py-3 flex-row items-center gap-2 shadow-lg"
+          onPress={() => setViewMode(viewMode === "map" ? "list" : "map")}
+          activeOpacity={0.8}
+        >
+          <Text className="text-base font-semibold text-gray-800">
+            {viewMode === "map" ? "📋 Liste" : "🗺️ Carte"}
           </Text>
+          <View className="bg-blue-600 px-2 py-0.5 rounded-xl">
+            <Text className="text-white text-xs font-bold">
+              {filteredActivities.length}
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-white rounded-3xl px-4 py-3 flex-row items-center gap-2 shadow-lg"
+          onPress={() => setShowFilters(!showFilters)}
+          activeOpacity={0.8}
+        >
+          <Text className="text-base font-semibold text-gray-800">
+            🔍 Filtres
+          </Text>
+          {selectedCategories.length > 0 && (
+            <View className="bg-green-600 px-2 py-0.5 rounded-xl">
+              <Text className="text-white text-xs font-bold">
+                {selectedCategories.length}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <View className="absolute top-[230px] left-4 right-4 z-20 bg-white rounded-3xl shadow-2xl p-4 max-h-[400px]">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-bold text-gray-900">Catégories</Text>
+            {selectedCategories.length > 0 && (
+              <TouchableOpacity onPress={clearFilters}>
+                <Text className="text-sm text-red-500 font-semibold">
+                  Effacer
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View className="flex-row flex-wrap gap-2">
+              {CATEGORIES.map((category) => {
+                const isSelected = selectedCategories.includes(category);
+                return (
+                  <TouchableOpacity
+                    key={category}
+                    className={`px-3 py-2 rounded-xl ${
+                      isSelected
+                        ? "bg-green-600 border-2 border-green-700"
+                        : "bg-gray-100 border-2 border-gray-200"
+                    }`}
+                    onPress={() => toggleCategory(category)}
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      className={`text-sm font-semibold ${
+                        isSelected ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      {CATEGORY_LABELS[category]}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
-      </TouchableOpacity>
+      )}
 
       {/* Map View */}
       {viewMode === "map" && (
@@ -247,9 +377,16 @@ export default function HomeScreen() {
             <Text className="text-xl font-bold text-gray-900">
               Activités à Vaud
             </Text>
+            {selectedCategories.length > 0 && (
+              <Text className="text-sm text-gray-600 mt-1">
+                {filteredActivities.length} résultat
+                {filteredActivities.length > 1 ? "s" : ""} filtré
+                {filteredActivities.length > 1 ? "s" : ""}
+              </Text>
+            )}
           </View>
           <FlatList
-            data={activities}
+            data={filteredActivities}
             renderItem={renderActivityCard}
             keyExtractor={(item) => item.id}
             className="p-4 pb-8"

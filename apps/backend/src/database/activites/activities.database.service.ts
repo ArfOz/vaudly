@@ -5,8 +5,15 @@ import { PrismaService } from '../prisma';
 export class ActivitiesDatabaseService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list() {
+  async list(categories?: string[]) {
     return await this.prisma.activity.findMany({
+      where: categories
+        ? {
+            category: {
+              hasSome: categories,
+            },
+          }
+        : undefined,
       include: {
         location: true,
       },
@@ -27,8 +34,7 @@ export class ActivitiesDatabaseService {
   async create(input: {
     name: string;
     description?: string | null;
-    category?: string | null;
-    categoryNames?: string[];
+    category?: string[];
     subtitle?: string | null;
     date?: string | null;
     price?: string | null;
@@ -82,7 +88,7 @@ export class ActivitiesDatabaseService {
       data: {
         name: input.name,
         description: input.description ?? undefined,
-        categoryNames: input.categoryNames ?? [],
+        category: input.category ?? [],
         subtitle: input.subtitle ?? undefined,
         date: input.date ?? undefined,
         price: input.price ?? undefined,
@@ -101,7 +107,7 @@ export class ActivitiesDatabaseService {
     input: {
       name?: string;
       description?: string | null;
-      category?: string | null;
+      category?: string[];
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;
@@ -112,7 +118,6 @@ export class ActivitiesDatabaseService {
       city?: string | null;
       latitude?: number | null;
       longitude?: number | null;
-      categoryNames?: string[];
     },
   ) {
     type LocationUpdate =
@@ -175,9 +180,7 @@ export class ActivitiesDatabaseService {
         ...(input.subtitle !== undefined ? { subtitle: input.subtitle } : {}),
         ...(input.date !== undefined ? { date: input.date } : {}),
         ...(input.price !== undefined ? { price: input.price } : {}),
-        ...(input.categoryNames !== undefined
-          ? { categoryNames: input.categoryNames }
-          : {}),
+        ...(input.category !== undefined ? { category: input.category } : {}),
         ...(input.startTime !== undefined
           ? { startTime: input.startTime ? new Date(input.startTime) : null }
           : {}),

@@ -6,6 +6,7 @@ import {
   Body,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { ActivityResponse, CreateActivityDto } from './dtos/actvities.dto';
@@ -15,8 +16,13 @@ export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
   @Get()
-  async list(): Promise<ActivityResponse[]> {
-    return await this.activities.listActivities();
+  async list(
+    @Query('categories') categories?: string,
+  ): Promise<ActivityResponse[]> {
+    const categoryArray = categories
+      ? categories.split(',').map((c) => c.trim())
+      : undefined;
+    return await this.activities.listActivities(categoryArray);
   }
 
   @Get(':id')

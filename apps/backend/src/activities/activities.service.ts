@@ -8,8 +8,8 @@ export class ActivitiesService {
     private readonly activitiesDatabaseService: ActivitiesDatabaseService,
   ) {}
 
-  async listActivities(): Promise<ActivityResponse[]> {
-    return await this.activitiesDatabaseService.list();
+  async listActivities(categories?: string[]): Promise<ActivityResponse[]> {
+    return await this.activitiesDatabaseService.list(categories);
   }
 
   async findById(id: string) {

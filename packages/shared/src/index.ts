@@ -24,7 +24,7 @@ export interface ActivityResponse {
   updatedAt: Date;
   locationId: string;
   location: Location;
-  categoryNames: string[];
+  category: string[];
 }
 
 export interface CreateActivityDto {
