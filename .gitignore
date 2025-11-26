@@ -31,7 +31,9 @@ lerna-debug.log*
 Thumbs.db
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 *.swp
 *.swo
@@ -61,3 +63,9 @@ out/
 
 # Metro
 .metro-health-check*
+
+# Scrapers (keep private)
+**/scraper/scrapers/*.scraper.ts
+!**/scraper/scrapers/template.scraper.ts
+**/test-scraper.js
+**/map-script.js
