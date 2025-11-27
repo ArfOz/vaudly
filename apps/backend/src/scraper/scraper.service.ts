@@ -1,23 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ActivitiesDatabaseService } from '../database/activites';
 import { PrismaService } from '../database/prisma';
-import { SwissMilkFarmScraper } from './scrapers';
+import { SwissMilkFarmScraper, IllustreFarmScraper } from './scrapers';
 
 @Injectable()
 export class ScraperService {
   private readonly logger = new Logger(ScraperService.name);
   private readonly swissMilkFarmScraper: SwissMilkFarmScraper;
+  private readonly illustreFarmScraper: IllustreFarmScraper;
 
   constructor(
     private readonly activitiesDb: ActivitiesDatabaseService,
     private readonly prisma: PrismaService,
   ) {
     this.swissMilkFarmScraper = new SwissMilkFarmScraper(activitiesDb, prisma);
+    this.illustreFarmScraper = new IllustreFarmScraper(activitiesDb, prisma);
   }
 
-  /**
-   * Scrape SwissMilk farms
-   */
+  async scrapeIllustreFarms() {
+    this.logger.log('Starting Illustre farm scraping...');
+    return await this.illustreFarmScraper.scrape();
+  }
+
   async scrapeFarms() {
     this.logger.log('Starting SwissMilk farm scraping...');
     return await this.swissMilkFarmScraper.scrape();

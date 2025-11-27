@@ -10,6 +10,13 @@ export interface ScrapedActivity {
   longitude?: number;
   address?: string;
   city?: string;
+  /**
+   * Category or categories for the activity (e.g., ['Farm'])
+   */
+  category?: string[];
+  /**
+   * @deprecated Use 'category' instead
+   */
   categoryNames?: string[];
 }
 
@@ -131,7 +138,7 @@ export abstract class BaseScraper {
         if (existing) {
           await this.activitiesDb.update(existing.id, {
             description: activity.description,
-            categoryNames: activity.categoryNames || [],
+            category: activity.category || activity.categoryNames || [],
             address: activity.address,
             city: activity.city,
             latitude: activity.latitude,
@@ -143,7 +150,7 @@ export abstract class BaseScraper {
           await this.activitiesDb.create({
             name: activity.name,
             description: activity.description,
-            categoryNames: activity.categoryNames || [],
+            category: activity.category || activity.categoryNames || [],
             address: activity.address,
             city: activity.city,
             latitude: activity.latitude,

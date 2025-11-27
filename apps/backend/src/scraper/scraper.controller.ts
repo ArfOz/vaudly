@@ -16,8 +16,19 @@ export class ScraperController {
             'Scrape farm direct sales locations from SwissMilk website',
           category: 'Farm',
         },
+        {
+          name: 'Illustre Farms',
+          endpoint: '/scraper/illustre-farms',
+          description: 'Scrape 90 vaud farms from Illustre magazine',
+          category: 'Farm',
+        },
       ],
     };
+  }
+
+  @Post('illustre-farms')
+  async scrapeIllustreFarms() {
+    return await this.scraperService.scrapeIllustreFarms();
   }
 
   @Post('farms')
