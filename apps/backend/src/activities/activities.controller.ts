@@ -9,20 +9,27 @@ import {
   Query,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
-import { ActivityResponse, CreateActivityDto } from './dtos/actvities.dto';
+import {
+  ActivityResponse,
+  CreateActivityDto,
+  GetActivitiesDto,
+} from './dtos/actvities.dto';
+import { GetActivitiesQueryParams } from 'shared';
+import { CategoryType } from 'database/generated/client/edge';
 
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
   @Get()
-  async list(
-    @Query('categories') categories?: string,
-  ): Promise<ActivityResponse[]> {
-    const categoryArray = categories
-      ? categories.split(',').map((c) => c.trim())
+  async list(@Query() query: GetActivitiesDto) {
+    const categories = query.categories
+      ? ((query.categories as unknown as string)
+          .split(',')
+          .map((c: string) => c.trim()) as CategoryType[])
       : undefined;
-    return await this.activities.listActivities(categoryArray);
+
+    return this.activities.listActivities(categories);
   }
 
   @Get(':id')

@@ -1,4 +1,5 @@
-import { Category } from "./../../database/generated/client/index.d";
+import { CategoryType } from "./enum.js";
+
 export interface Location {
   id: string;
   name: string | null;
@@ -58,3 +59,10 @@ export interface UpdateActivityDto {
   latitude?: number | null;
   longitude?: number | null;
 }
+
+export const GetActivitiesQueryParams = {
+  CATEGORIES: "categories",
+} as const;
+
+// Validation decorators removed from shared. Use plain type if needed:
+// export interface GetActivitiesDto { categories?: CategoryType[]; }
