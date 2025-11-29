@@ -11,56 +11,12 @@ import {
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import type { ActivityResponse } from "shared";
-import { apiService } from "@/services/api.service";
 import { useRouter } from "expo-router";
+import { CategoryType } from "@shared"; // shared-types veya backend generate enum
+
+const categories: CategoryType[] = [CategoryType.FARM, CategoryType.CAFE];
 
 const { height } = Dimensions.get("window");
-
-const CATEGORIES = [
-  "FARM",
-  "GARDEN",
-  "RESTAURANT",
-  "CAFE",
-  "BAR",
-  "MARKET",
-  "SPORTS",
-  "CULTURE",
-  "NATURE",
-  "ENTERTAINMENT",
-  "EDUCATION",
-  "WELLNESS",
-  "FAMILY",
-  "ADVENTURE",
-  "MUSIC",
-  "ART",
-  "FESTIVAL",
-  "SHOPPING",
-  "NIGHTLIFE",
-  "OTHER",
-] as const;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  FARM: "🌾 Ferme",
-  GARDEN: "🌿 Jardin",
-  RESTAURANT: "🍽️ Restaurant",
-  CAFE: "☕ Café",
-  BAR: "🍺 Bar",
-  MARKET: "🛒 Marché",
-  SPORTS: "⚽ Sport",
-  CULTURE: "🎭 Culture",
-  NATURE: "🏞️ Nature",
-  ENTERTAINMENT: "🎪 Divertissement",
-  EDUCATION: "📚 Éducation",
-  WELLNESS: "💆 Bien-être",
-  FAMILY: "👨‍👩‍👧‍👦 Famille",
-  ADVENTURE: "🧗 Aventure",
-  MUSIC: "🎵 Musique",
-  ART: "🎨 Art",
-  FESTIVAL: "🎉 Festival",
-  SHOPPING: "🛍️ Shopping",
-  NIGHTLIFE: "🌙 Vie nocturne",
-  OTHER: "📌 Autre",
-};
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -80,6 +36,7 @@ export default function HomeScreen() {
   const fetchActivities = async () => {
     try {
       setLoading(true);
+
       const data = await apiService.getActivities();
       setActivities(data);
       setError(null);

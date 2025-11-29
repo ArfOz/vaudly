@@ -6,7 +6,9 @@ import {
   IsEmail,
   IsNumber,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
+import { CategoryType } from 'database/generated/client';
 
 export {
   ActivityResponse,
@@ -67,4 +69,10 @@ export class CreateActivityDto {
   @IsNumber()
   @IsOptional()
   longitude?: number;
+}
+
+export class GetActivitiesDto {
+  @IsOptional()
+  @IsEnum(CategoryType, { each: true })
+  categories?: CategoryType[];
 }

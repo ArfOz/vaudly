@@ -1,6 +1,19 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const { withNativeWind } = require("nativewind/metro");
+const path = require("path");
 
-const config = getDefaultConfig(__dirname);
+const projectRoot = __dirname;
+const workspaceRoot = path.resolve(projectRoot, "../../");
 
-module.exports = withNativeWind(config, { input: "./global.css" });
+const config = getDefaultConfig(projectRoot);
+
+// Monorepo klasörünü izlemeye al
+config.watchFolders = [workspaceRoot];
+
+// Module alias tanımla
+config.resolver.extraNodeModules = {
+  "@shared": path.resolve(workspaceRoot, "packages/shared/src"),
+  "@database": path.resolve(workspaceRoot, "packages/database/src"),
+};
+
+module.exports = withNativeWind(config);

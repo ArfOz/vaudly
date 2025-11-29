@@ -1,0 +1,7 @@
+{
+  "name": "build",
+  "description": "Emit only type declarations for shared package.",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  }
+}

@@ -35,11 +35,11 @@ enum CategoryType {
 }
 
 model Category {
-  id         String       @id @default(cuid())
-  type       CategoryType
-  name       String
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id        String       @id @default(cuid())
+  type      CategoryType
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
   @@unique([type, name])
   @@index([type])

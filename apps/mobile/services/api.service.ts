@@ -49,8 +49,12 @@ class ApiService {
   }
 
   // Activities
-  async getActivities(): Promise<ActivityResponse[]> {
-    const response = await this.client.get<ActivityResponse[]>("/activities");
+  async getActivities(categories?: string[]): Promise<ActivityResponse[]> {
+    const response = await this.client.get<ActivityResponse[]>("/activities", {
+      params: {
+        categories: categories,
+      },
+    });
     return response.data;
   }
 

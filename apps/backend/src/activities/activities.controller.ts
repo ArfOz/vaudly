@@ -14,8 +14,7 @@ import {
   CreateActivityDto,
   GetActivitiesDto,
 } from './dtos/actvities.dto';
-import { GetActivitiesQueryParams } from 'shared';
-import { CategoryType } from 'database/generated/client/edge';
+import { CategoryType } from '@shared';
 
 @Controller('activities')
 export class ActivitiesController {
