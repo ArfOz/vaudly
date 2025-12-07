@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Module } from '@nestjs/common';
 import { ScraperController } from './scraper.controller';
 import { ScraperService } from './scraper.service';
@@ -10,3 +11,17 @@ import { PrismaModule } from '../database/prisma';
   providers: [ScraperService],
 })
 export class ScraperModule {}
+=======
+// import { Module } from '@nestjs/common';
+// import { ScraperController } from './scraper.controller';
+// import { ScraperService } from './scraper.service';
+// import { ActivitiesDatabaseModule } from '../database/activites';
+// import { PrismaModule } from '../database/prisma';
+
+// @Module({
+//   imports: [ActivitiesDatabaseModule, PrismaModule],
+//   controllers: [ScraperController],
+//   providers: [ScraperService],
+// })
+// export class ScraperModule {}
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)

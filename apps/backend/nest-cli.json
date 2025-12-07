@@ -3,6 +3,14 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
+<<<<<<< HEAD
     "deleteOutDir": true
+=======
+    "deleteOutDir": true,
+    "builder": "webpack",
+    "webpack": true,
+    "webpackConfigPath": "webpack.config.js",
+    "tsConfigPath": "tsconfig.app.json"
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
   }
 }

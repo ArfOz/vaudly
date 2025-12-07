@@ -6,17 +6,36 @@ import {
   Body,
   Put,
   Delete,
+<<<<<<< HEAD
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { ActivityResponse, CreateActivityDto } from './dtos/actvities.dto';
+=======
+  Query,
+} from '@nestjs/common';
+import { ActivitiesService } from './activities.service';
+import { CreateActivityDto, GetActivitiesDto } from './dtos/actvities.dto';
+import { CategoryType } from '@shared';
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
 
 @Controller('activities')
 export class ActivitiesController {
   constructor(private readonly activities: ActivitiesService) {}
 
   @Get()
+<<<<<<< HEAD
   async list(): Promise<ActivityResponse[]> {
     return await this.activities.listActivities();
+=======
+  async list(@Query() query: GetActivitiesDto) {
+    const categories = query.categories
+      ? ((query.categories as unknown as string)
+          .split(',')
+          .map((c: string) => c.trim()) as CategoryType[])
+      : undefined;
+
+    return this.activities.listActivities(categories);
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
   }
 
   @Get(':id')
@@ -36,7 +55,11 @@ export class ActivitiesController {
     body: {
       name?: string;
       description?: string | null;
+<<<<<<< HEAD
       category?: string | null;
+=======
+      category?: string[];
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;
@@ -47,7 +70,11 @@ export class ActivitiesController {
       city?: string | null;
       latitude?: number | null;
       longitude?: number | null;
+<<<<<<< HEAD
     },
+=======
+    }
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
   ) {
     return await this.activities.update(id, body);
   }

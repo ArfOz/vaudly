@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "service",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "emitDeclarationOnly": false,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node"]
+  },
+  "include": ["service/**/*.ts"],
+  "references": [],
+  "exclude": [
+    "jest.config.ts",
+    "jest.config.cts",
+    "service/**/*.spec.ts",
+    "service/**/*.test.ts"
+  ]
+}

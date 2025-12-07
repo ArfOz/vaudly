@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // @ts-check
 import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -34,3 +35,8 @@ export default tseslint.config(
     },
   },
 );
+=======
+import baseConfig from '../../eslint.config.mjs';
+
+export default [...baseConfig];
+>>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
