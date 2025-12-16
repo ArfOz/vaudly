@@ -1,0 +1,21 @@
+{
+  "name": "vaudly",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "cross-env-shell \"cd backend && npm install && cd ../mobile && npm install && cd ../packages/shared && npm install && cd ../packages/database && npm install\"",
+    "dev": "cross-env-shell \"concurrently \\\"npm run backend:dev\\\" \\\"npm run mobile:start\\\"\"",
+    "backend:dev": "cross-env-shell \"cd backend && npm run start:dev\"",
+    "mobile:start": "cross-env-shell \"cd mobile && npm start\"",
+    "db:generate": "cross-env-shell \"cd packages/database && npx prisma generate\"",
+    "db:migrate": "cross-env-shell \"cd packages/database && npx prisma migrate dev\""
+  },
+  "devDependencies": {
+    "prisma": "^7.1.0"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
+    "pg": "^8.16.3"
+  }
+}

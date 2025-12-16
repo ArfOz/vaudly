@@ -1,0 +1,43 @@
+
+# Mobile app .gitignore
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Debug/log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS/Windows
+.DS_Store
+Thumbs.db
+*.pem
+
+# Env
+.env
+.env.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Example
+app-example
+
+# generated native folders
+/ios
+/android

@@ -1,0 +1,17 @@
+{
+  "name": "@vaudly/shared",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc --outDir dist"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2"
+  }
+}
