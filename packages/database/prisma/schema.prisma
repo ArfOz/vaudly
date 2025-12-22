@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Canton {
+  VD
+}
+
+enum CategoryType {
+  FARM
+  GARDEN
+  RESTAURANT
+  CAFE
+  BAR
+  MARKET
+  SPORTS
+  CULTURE
+  NATURE
+  ENTERTAINMENT
+  EDUCATION
+  WELLNESS
+  FAMILY
+  ADVENTURE
+  MUSIC
+  ART
+  FESTIVAL
+  SHOPPING
+  NIGHTLIFE
+  OTHER
+}
+
+model Category {
+  id        String       @id @default(cuid())
+  type      CategoryType
+  name      String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([type, name])
+  @@index([type])
+}
+
+model ScraperConfig {
+  id          String    @id @default(cuid())
+  url         String    @unique
+  name        String
+  typeName    String
+  typeCode    String
+  isActive    Boolean   @default(true)
+  lastScraped DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  selectors   Json?
+
+  @@index([isActive])
+  @@index([typeCode])
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String?
+  address   String?
+  city      String?
+  canton    Canton   @default(VD)
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  activities Activity[]
+
+  @@unique([address], name: "unique_location_address")
+  @@index([city])
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  description String?
+  subtitle    String?
+  date        String?
+  price       String?
+  category    String[]  @default([])
+  startTime   DateTime?
+  endTime     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  locationId String
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@index([startTime])
+  @@index([locationId])
+  @@index([category])
+}

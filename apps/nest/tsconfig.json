@@ -1,0 +1,22 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs", // nodenext yerine commonjs
+    "moduleResolution": "node", // nodenext yerine node
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "declaration": false, // tip-only paket için NestJS tarafında gerek yok
+    "outDir": "./dist",
+    "incremental": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "@vaudly/shared": ["../../packages/shared/src/index.ts"],
+      "@vaudly/database": ["../../packages/database/dist/index"]
+    }
+  },
+  "include": ["src"]
+}
