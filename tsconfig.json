@@ -1,46 +1,17 @@
 {
-<<<<<<< HEAD
   "compilerOptions": {
     "target": "ES2023",
     "module": "esnext",
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "database/*": [
-        "packages/database/*"
-      ],
-      "database": [
-        "packages/database/index.ts"
-      ],
-      "shared": [
-        "packages/shared/src/index.ts"
-      ],
-      "shared/*": [
-        "packages/shared/src/*"
-      ]
+      "database/*": ["packages/database/*"],
+      "database": ["packages/database/index.ts"],
+      "shared": ["packages/shared/src/index.ts"],
+      "shared/*": ["packages/shared/src/*"]
     },
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true
-  },
-  "extends": "expo/tsconfig.base"
-=======
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "files": [],
-  "references": [
-    {
-      "path": "./apps/mobile"
-    },
-    {
-      "path": "./apps/backend"
-    },
-    {
-      "path": "./libs/database"
-    },
-    {
-      "path": "./libs/shared"
-    }
-  ]
->>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
+  }
 }

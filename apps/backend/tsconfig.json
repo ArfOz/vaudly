@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "compilerOptions": {
     "module": "commonjs",
     "moduleResolution": "node",
@@ -30,20 +29,5 @@
     "src/**/*",
     "../../packages/database/**/*",
     "../../packages/shared/**/*"
-=======
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": "../.."
-  },
-  "files": [],
-  "include": [],
-  "references": [
-    {
-      "path": "./tsconfig.app.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
->>>>>>> 083c5b8 (Initial monorepo with Nx, Expo, NestJS, Prisma setup)
   ]
 }

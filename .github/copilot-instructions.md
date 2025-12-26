@@ -1,6 +1,6 @@
-# Nx Monorepo with Expo and NestJS
+# Turborepo with Expo and NestJS
 
-This is an Nx monorepo containing:
+This repository uses Turborepo to orchestrate multiple packages/apps:
 
 - Expo React Native mobile application
 - NestJS backend API
@@ -10,11 +10,19 @@ This is an Nx monorepo containing:
 
 - `apps/mobile` - Expo React Native app
 - `apps/backend` - NestJS backend API
-- `libs/` - Shared libraries
+- `packages/shared` - Shared TypeScript library
+- `packages/database` - Prisma schema, generated client, and seeds
 
 ## Development
 
-Run mobile app: `nx serve mobile`
-Run API: `nx serve api`
-Run tests: `nx test <project-name>`
-Build: `nx build <project-name>`
+- Run both apps in parallel: `npm run dev` (executes `turbo run dev --parallel`)
+- Run backend only: `npm run dev:backend`
+- Run mobile only: `npm run dev:mobile`
+
+## Testing
+
+- Per-app tests: use each app's `jest` config (e.g., run from its workspace)
+
+## Build
+
+- Use app-specific build scripts; Turborepo pipelines are defined in `turbo.json`.
