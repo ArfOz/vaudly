@@ -1,5 +1,6 @@
 import "../global.css"
 import { useEffect, useState, useRef } from "react"
+import * as Linking from "expo-linking"
 import {
   View,
   Text,
@@ -54,6 +55,8 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null)
+  const [selectedLocation, setSelectedLocation] =
+    useState<ActivityLocation | null>(null)
   const [viewMode, setViewMode] = useState<"map" | "list">("map")
   const mapRef = useRef<MapView>(null)
 
@@ -82,9 +85,8 @@ export default function HomeScreen() {
   )
 
   const onActivityPress = (activity: ActivityResponse) => {
-    // Always set selected activity, even if already selected
     setSelectedActivity(activity.id)
-    // Always show popup on marker tap
+    setSelectedLocation(activity.location)
     if (viewMode !== "map") setViewMode("map")
     if (activity.location.latitude && activity.location.longitude) {
       setTimeout(() => {
@@ -101,6 +103,16 @@ export default function HomeScreen() {
         }
       }, 100)
     }
+  }
+
+  const handleNavigate = () => {
+    if (!selectedLocation?.latitude || !selectedLocation?.longitude) return
+    const lat = selectedLocation.latitude
+    const lng = selectedLocation.longitude
+    const label = selectedLocation.name || "Konum"
+    // Google Maps URL
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${label}`
+    Linking.openURL(url)
   }
 
   const renderActivityCard = ({ item }: { item: ActivityResponse }) => {
@@ -285,7 +297,7 @@ export default function HomeScreen() {
       )}
 
       {/* Selected Activity Popup */}
-      {selectedActivity && (
+      {selectedActivity && selectedLocation && (
         <View className="absolute bottom-8 left-4 right-4 bg-white rounded-2xl p-4 shadow-lg">
           <Text className="text-base font-bold text-gray-900">
             {activities.find((f) => f.id === selectedActivity)?.name}
@@ -294,8 +306,15 @@ export default function HomeScreen() {
             {activities.find((f) => f.id === selectedActivity)?.description}
           </Text>
           <Text className="text-xs text-gray-400 mt-2">
-            {activities.find((f) => f.id === selectedActivity)?.location.city}
+            {selectedLocation.city}
           </Text>
+          <TouchableOpacity
+            className="mt-4 bg-blue-600 px-4 py-2 rounded-xl items-center flex-row justify-center"
+            onPress={handleNavigate}
+            activeOpacity={0.85}
+          >
+            <Text className="text-white text-base font-semibold">Git 🚗</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>

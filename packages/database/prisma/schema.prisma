@@ -85,6 +85,8 @@ model Activity {
   subtitle    String?
   date        String?
   price       String?
+  phone       String?
+  website     String?
   category    String[]  @default([])
   startTime   DateTime?
   endTime     DateTime?
@@ -94,7 +96,22 @@ model Activity {
   locationId String
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
+  products   Product[]
+
   @@index([startTime])
   @@index([locationId])
   @@index([category])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float?
+  activityId  String
+  activity    Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([activityId])
 }
