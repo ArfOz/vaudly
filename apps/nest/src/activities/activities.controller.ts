@@ -28,41 +28,41 @@ export class ActivitiesController {
     return this.activities.listActivities(categories);
   }
 
-  // @Get(':id')
-  // async get(@Param('id') id: string) {
-  //   return await this.activities.findById(id);
-  // }
+  @Get(':id')
+  async get(@Param('id') id: string) {
+    return await this.activities.findById(id);
+  }
 
-  // @Post()
-  // async create(@Body() body: CreateActivityDto) {
-  //   return await this.activities.create(body);
-  // }
+  @Post()
+  async create(@Body() body: CreateActivityDto) {
+    return await this.activities.create(body);
+  }
 
-  // @Put(':id')
-  // async update(
-  //   @Param('id') id: string,
-  //   @Body()
-  //   body: {
-  //     name?: string;
-  //     description?: string | null;
-  //     category?: string[];
-  //     subtitle?: string | null;
-  //     date?: string | null;
-  //     price?: string | null;
-  //     startTime?: string | null;
-  //     endTime?: string | null;
-  //     locationId?: string | null;
-  //     address?: string | null;
-  //     city?: string | null;
-  //     latitude?: number | null;
-  //     longitude?: number | null;
-  //   }
-  // ) {
-  //   return await this.activities.update(id, body);
-  // }
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      name?: string;
+      description?: string | null;
+      category?: string[];
+      subtitle?: string | null;
+      date?: string | null;
+      price?: string | null;
+      startTime?: string | null;
+      endTime?: string | null;
+      locationId?: string | null;
+      address?: string | null;
+      city?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+    },
+  ) {
+    return await this.activities.update(id, body);
+  }
 
-  // @Delete(':id')
-  // async remove(@Param('id') id: string) {
-  //   return await this.activities.remove(id);
-  // }
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return await this.activities.remove(id);
+  }
 }

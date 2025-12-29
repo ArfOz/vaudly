@@ -205,7 +205,7 @@ export class ActivitiesDatabaseService {
     });
   }
 
-  //   async remove(id: string) {
-  //     return await this.prisma.activity.delete({ where: { id } });
-  //   }
+  async remove(id: string) {
+    return await this.prisma.activity.delete({ where: { id } });
+  }
 }

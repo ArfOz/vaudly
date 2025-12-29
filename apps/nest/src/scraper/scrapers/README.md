@@ -1,4 +1,4 @@
-# Scrapers
+<!-- # Scrapers
 
 Bu klasör web scraping yapıları içerir. Her scraper, belirli bir websiteden aktivite verilerini toplar ve veritabanına kaydeder.
 
@@ -281,4 +281,4 @@ curl http://localhost:3000/api/scraper/available
    if (name && address) {
      activities.push({ name, address, ... });
    }
-   ```
+   ``` -->
