@@ -1,8 +1,17 @@
 {
+<<<<<<< HEAD
   "eslint.workingDirectories": [
     {
       "mode": "auto"
     }
   ],
   "prisma.fileWatcher": false
+=======
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }

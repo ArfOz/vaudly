@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs", // nodenext yerine commonjs
-    "moduleResolution": "node", // nodenext yerine node
+    "module": "commonjs",
+    "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "declaration": false, // tip-only paket için NestJS tarafında gerek yok
+    "declaration": false,
     "outDir": "./dist",
     "incremental": true,
     "skipLibCheck": true,

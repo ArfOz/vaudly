@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "my-turborepo",
   "private": true,
   "scripts": {
@@ -16,5 +17,26 @@
   "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
+=======
+  "name": "vaudly",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo powered by Turborepo for Expo + NestJS",
+  "packageManager": "npm@11.3.0",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "dev:backend": "npm --workspace apps/backend run start:dev",
+    "dev:mobile": "npm --workspace apps/mobile start"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "libs/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.6.1",
+    "typescript": "^5.9.3"
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
   }
 }

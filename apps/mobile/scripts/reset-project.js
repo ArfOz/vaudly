@@ -50,7 +50,11 @@ const moveDirectories = async (userInput) => {
     if (userInput === "y") {
       // Create the app-example directory
       await fs.promises.mkdir(exampleDirPath, { recursive: true });
+<<<<<<< HEAD
       console.log(`📁 /${exampleDir} directory created.`);
+=======
+      console.log(`Ã°Å¸â€œÂ /${exampleDir} directory created.`);
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
     }
 
     // Move old directories to new app-example directory or delete them
@@ -60,6 +64,7 @@ const moveDirectories = async (userInput) => {
         if (userInput === "y") {
           const newDirPath = path.join(root, exampleDir, dir);
           await fs.promises.rename(oldDirPath, newDirPath);
+<<<<<<< HEAD
           console.log(`➡️ /${dir} moved to /${exampleDir}/${dir}.`);
         } else {
           await fs.promises.rm(oldDirPath, { recursive: true, force: true });
@@ -67,25 +72,48 @@ const moveDirectories = async (userInput) => {
         }
       } else {
         console.log(`➡️ /${dir} does not exist, skipping.`);
+=======
+          console.log(`Ã¢Å¾Â¡Ã¯Â¸Â /${dir} moved to /${exampleDir}/${dir}.`);
+        } else {
+          await fs.promises.rm(oldDirPath, { recursive: true, force: true });
+          console.log(`Ã¢ÂÅ’ /${dir} deleted.`);
+        }
+      } else {
+        console.log(`Ã¢Å¾Â¡Ã¯Â¸Â /${dir} does not exist, skipping.`);
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
       }
     }
 
     // Create new /app directory
     const newAppDirPath = path.join(root, newAppDir);
     await fs.promises.mkdir(newAppDirPath, { recursive: true });
+<<<<<<< HEAD
     console.log("\n📁 New /app directory created.");
+=======
+    console.log("\nÃ°Å¸â€œÂ New /app directory created.");
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
     // Create index.tsx
     const indexPath = path.join(newAppDirPath, "index.tsx");
     await fs.promises.writeFile(indexPath, indexContent);
+<<<<<<< HEAD
     console.log("📄 app/index.tsx created.");
+=======
+    console.log("Ã°Å¸â€œâ€ž app/index.tsx created.");
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
     // Create _layout.tsx
     const layoutPath = path.join(newAppDirPath, "_layout.tsx");
     await fs.promises.writeFile(layoutPath, layoutContent);
+<<<<<<< HEAD
     console.log("📄 app/_layout.tsx created.");
 
     console.log("\n✅ Project reset complete. Next steps:");
+=======
+    console.log("Ã°Å¸â€œâ€ž app/_layout.tsx created.");
+
+    console.log("\nÃ¢Å“â€¦ Project reset complete. Next steps:");
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
     console.log(
       `1. Run \`npx expo start\` to start a development server.\n2. Edit app/index.tsx to edit the main screen.${
         userInput === "y"
@@ -94,7 +122,11 @@ const moveDirectories = async (userInput) => {
       }`
     );
   } catch (error) {
+<<<<<<< HEAD
     console.error(`❌ Error during script execution: ${error.message}`);
+=======
+    console.error(`Ã¢ÂÅ’ Error during script execution: ${error.message}`);
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
   }
 };
 
@@ -105,7 +137,11 @@ rl.question(
     if (userInput === "y" || userInput === "n") {
       moveDirectories(userInput).finally(() => rl.close());
     } else {
+<<<<<<< HEAD
       console.log("❌ Invalid input. Please enter 'Y' or 'N'.");
+=======
+      console.log("Ã¢ÂÅ’ Invalid input. Please enter 'Y' or 'N'.");
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
       rl.close();
     }
   }

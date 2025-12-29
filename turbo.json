@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "tasks": {
@@ -16,6 +17,14 @@
     "dev": {
       "cache": false,
       "persistent": true
+=======
+  "tasks": {
+    "dev": {
+      "cache": false
+    },
+    "build": {
+      "outputs": ["dist/**"]
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
     }
   }
 }

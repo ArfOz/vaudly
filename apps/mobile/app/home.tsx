@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 import "../global.css"
 import { useEffect, useState, useRef } from "react"
 import * as Linking from "expo-linking"
+=======
+import { useEffect, useState, useRef } from "react";
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 import {
   View,
   Text,
@@ -8,6 +12,7 @@ import {
   FlatList,
   TouchableOpacity,
   Dimensions,
+<<<<<<< HEAD
 } from "react-native"
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import { useRouter } from "expo-router"
@@ -89,6 +94,65 @@ export default function HomeScreen() {
     setSelectedLocation(activity.location)
     if (viewMode !== "map") setViewMode("map")
     if (activity.location.latitude && activity.location.longitude) {
+=======
+  Animated,
+} from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import type { ActivityResponse } from "shared";
+import { apiService } from "@/services/api.service";
+import { useRouter } from "expo-router";
+
+const { height } = Dimensions.get("window");
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const [activities, setActivities] = useState<ActivityResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const mapRef = useRef<MapView>(null);
+
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
+  const fetchActivities = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getActivities();
+      setActivities(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch activities");
+      console.error("Error fetching activities:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validMarkers = activities.filter(
+    (activity) =>
+      activity.location.latitude !== null &&
+      activity.location.longitude !== null,
+  );
+
+  const initialRegion = {
+    latitude: 46.5197,
+    longitude: 6.6323,
+    latitudeDelta: 0.5,
+    longitudeDelta: 0.5,
+  };
+
+  const onActivityPress = (activity: ActivityResponse) => {
+    setSelectedActivity(activity.id);
+
+    // Switch to map view and focus on the location
+    if (activity.location.latitude && activity.location.longitude) {
+      setViewMode("map");
+
+      // Use setTimeout to ensure the map is rendered before animating
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
       setTimeout(() => {
         if (mapRef.current) {
           mapRef.current.animateToRegion(
@@ -98,6 +162,7 @@ export default function HomeScreen() {
               latitudeDelta: 0.05,
               longitudeDelta: 0.05,
             },
+<<<<<<< HEAD
             350
           )
         }
@@ -117,6 +182,17 @@ export default function HomeScreen() {
 
   const renderActivityCard = ({ item }: { item: ActivityResponse }) => {
     const isSelected = selectedActivity === item.id
+=======
+            350,
+          );
+        }
+      }, 100);
+    }
+  };
+
+  const renderActivityCard = ({ item }: { item: ActivityResponse }) => {
+    const isSelected = selectedActivity === item.id;
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
     return (
       <TouchableOpacity
         className={`bg-white rounded-2xl p-4 mb-3 border ${
@@ -182,8 +258,13 @@ export default function HomeScreen() {
           )}
         </View>
       </TouchableOpacity>
+<<<<<<< HEAD
     )
   }
+=======
+    );
+  };
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
   if (loading) {
     return (
@@ -193,7 +274,11 @@ export default function HomeScreen() {
           Chargement...
         </Text>
       </View>
+<<<<<<< HEAD
     )
+=======
+    );
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
   }
 
   if (error) {
@@ -208,7 +293,11 @@ export default function HomeScreen() {
           <Text className="text-white text-base font-semibold">Réessayer</Text>
         </TouchableOpacity>
       </View>
+<<<<<<< HEAD
     )
+=======
+    );
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
   }
 
   return (
@@ -271,9 +360,13 @@ export default function HomeScreen() {
               pinColor={
                 selectedActivity === activity.id ? "#2563eb" : "#ef4444"
               }
+<<<<<<< HEAD
             >
               <Text style={{ fontSize: 24 }}>📍</Text>
             </Marker>
+=======
+            ></Marker>
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
           ))}
         </MapView>
       )}
@@ -295,6 +388,7 @@ export default function HomeScreen() {
           />
         </View>
       )}
+<<<<<<< HEAD
 
       {/* Selected Activity Popup */}
       {selectedActivity && selectedLocation && (
@@ -319,4 +413,8 @@ export default function HomeScreen() {
       )}
     </View>
   )
+=======
+    </View>
+  );
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }

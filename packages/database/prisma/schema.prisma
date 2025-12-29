@@ -1,10 +1,17 @@
 generator client {
   provider = "prisma-client-js"
+<<<<<<< HEAD
+=======
+  output   = "../generated/client"
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }
 
 datasource db {
   provider = "postgresql"
+<<<<<<< HEAD
   url      = env("DATABASE_URL")
+=======
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }
 
 enum Canton {
@@ -35,11 +42,19 @@ enum CategoryType {
 }
 
 model Category {
+<<<<<<< HEAD
   id        String       @id @default(cuid())
   type      CategoryType
   name      String
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+=======
+  id         String       @id @default(cuid())
+  type       CategoryType
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
   @@unique([type, name])
   @@index([type])
@@ -79,6 +94,7 @@ model Location {
 }
 
 model Activity {
+<<<<<<< HEAD
   id          String    @id @default(cuid())
   name        String    @unique
   description String?
@@ -92,10 +108,24 @@ model Activity {
   endTime     DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+=======
+  id            String             @id @default(cuid())
+  name          String             @unique
+  description   String?
+  subtitle      String?
+  date          String?
+  price         String?
+  categoryNames String[]           @default([])
+  startTime     DateTime?
+  endTime       DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
   locationId String
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
+<<<<<<< HEAD
   products   Product[]
 
   @@index([startTime])
@@ -114,4 +144,9 @@ model Product {
   updatedAt   DateTime @updatedAt
 
   @@index([activityId])
+=======
+  @@index([startTime])
+  @@index([locationId])
+  @@index([categoryNames])
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }

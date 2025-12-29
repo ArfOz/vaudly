@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { View, Text, TouchableOpacity, ScrollView, Linking } from "react-native"
 import { useRouter } from "expo-router"
 
@@ -15,15 +16,46 @@ export default function ContactScreen() {
   const handleWebsite = () => {
     Linking.openURL("https://vaudly.ch")
   }
+=======
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Linking,
+} from "react-native";
+import { useRouter } from "expo-router";
+
+export default function ContactScreen() {
+  const router = useRouter();
+
+  const handleEmail = () => {
+    Linking.openURL("mailto:contact@vaudly.ch");
+  };
+
+  const handlePhone = () => {
+    Linking.openURL("tel:+41123456789");
+  };
+
+  const handleWebsite = () => {
+    Linking.openURL("https://vaudly.ch");
+  };
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
   const handleSocial = (platform: string) => {
     const urls: { [key: string]: string } = {
       instagram: "https://instagram.com/vaudly",
       facebook: "https://facebook.com/vaudly",
       twitter: "https://twitter.com/vaudly",
+<<<<<<< HEAD
     }
     Linking.openURL(urls[platform])
   }
+=======
+    };
+    Linking.openURL(urls[platform]);
+  };
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 
   return (
     <ScrollView className="flex-1 bg-white">
@@ -50,7 +82,11 @@ export default function ContactScreen() {
       <View className="bg-green-600 pt-8 pb-8 px-6">
         <Text className="text-3xl font-bold text-white mb-2">Contact Us</Text>
         <Text className="text-green-100 text-base">
+<<<<<<< HEAD
           We&#39;d love to hear from you
+=======
+          We'd love to hear from you
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
         </Text>
       </View>
 
@@ -177,11 +213,19 @@ export default function ContactScreen() {
         {/* Info */}
         <View className="mt-6 bg-green-50 rounded-2xl p-5">
           <Text className="text-base text-green-900 leading-6">
+<<<<<<< HEAD
             💚 We&#39;re here to help! Feel free to reach out with any questions
+=======
+            💚 We're here to help! Feel free to reach out with any questions
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
             about activities, farm visits, or local experiences in Vaud.
           </Text>
         </View>
       </View>
     </ScrollView>
+<<<<<<< HEAD
   )
+=======
+  );
+>>>>>>> 6b81f19dca48f7a7180f1f041801c490fa07e5ce
 }
