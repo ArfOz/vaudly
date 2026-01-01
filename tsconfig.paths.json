@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@vaudly/shared": ["packages/shared/src/index.ts"],
+      "@vaudly/shared/*": ["packages/shared/src/*"],
+      "@vaudly/database": ["packages/database/src/index.ts"],
+      "@vaudly/database/*": ["packages/database/src/*"]
+    }
+  }
+}

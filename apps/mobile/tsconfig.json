@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.paths.json",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "types": ["expo-router", "nativewind"]
+  },
+  "include": [
+    "app",
+    "src",
+    "../../packages/shared/src/**/*",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
+}
