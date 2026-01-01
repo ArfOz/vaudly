@@ -10,7 +10,7 @@ import {
 } from "react-native"
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps"
 import type { ActivityResponse } from "@vaudly/shared"
-// import { apiService } from "@/services/api.service";
+import { apiService } from "../../services/api.service"
 import { useRouter } from "expo-router"
 
 const { height } = Dimensions.get("window")
@@ -97,10 +97,10 @@ export default function HomeScreen() {
             >
               {item.name}
             </Text>
-            {item.categoryNames && item.categoryNames.length > 0 && (
+            {item.category && item.category.length > 0 && (
               <View className="bg-blue-100 px-3 py-1 rounded-xl">
                 <Text className="text-xs font-semibold text-blue-600">
-                  {item.categoryNames[0]}
+                  {item.category[0]}
                 </Text>
               </View>
             )}

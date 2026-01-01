@@ -1,7 +1,4 @@
 {
-  "compilerOptions": {
-    "noEmit": true, // ⚠ build edilmez
-    "isolatedModules": true
-  },
+  "extends": "../../tsconfig.base.json",
   "include": ["src"]
 }

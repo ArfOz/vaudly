@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios"
-import type {
+import {
   ActivityResponse,
   CreateActivityDto,
   UpdateActivityDto,
