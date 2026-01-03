@@ -5,7 +5,8 @@ import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 
 // Leaflet marker ikonlarını düzelt
-delete (L.Icon.Default.prototype as any)._getIconUrl
+delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown })
+  ._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -42,9 +43,14 @@ interface Activity {
 interface MapViewProps {
   activities: Activity[]
   onActivityClick?: (activity: Activity) => void
+  selectedActivity?: Activity | null
 }
 
-export default function MapView({ activities, onActivityClick }: MapViewProps) {
+export default function MapView({
+  activities,
+  onActivityClick,
+  selectedActivity,
+}: MapViewProps) {
   const mapRef = useRef<L.Map | null>(null)
   const mapContainerRef = useRef<HTMLDivElement>(null)
 
@@ -111,17 +117,33 @@ export default function MapView({ activities, onActivityClick }: MapViewProps) {
       map.fitBounds(group.getBounds().pad(0.1))
     }
 
+    // Eğer seçili aktivite varsa ona zoom yap
+    if (
+      selectedActivity &&
+      selectedActivity.location.latitude &&
+      selectedActivity.location.longitude
+    ) {
+      map.setView(
+        [
+          selectedActivity.location.latitude,
+          selectedActivity.location.longitude,
+        ],
+        15,
+        { animate: true }
+      )
+    }
+
     return () => {
       markers.forEach((marker) => marker.remove())
     }
-  }, [activities, onActivityClick])
+  }, [activities, onActivityClick, selectedActivity])
 
   return (
     <div
       ref={mapContainerRef}
       style={{
         width: "100%",
-        height: "600px",
+        height: "300px",
         borderRadius: "8px",
         overflow: "hidden",
       }}
