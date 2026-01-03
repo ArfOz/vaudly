@@ -53,6 +53,10 @@ export default function EditActivityPage() {
     router.push("/")
   }
 
+  const handleReset = () => {
+    setForm(activity)
+  }
+
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Edit Activity</h1>
@@ -143,8 +147,20 @@ export default function EditActivityPage() {
             }
           />
         </label>
+        <div className="mt-2 text-sm text-gray-600">
+          <span className="font-semibold">Latitude:</span>{" "}
+          {form.location?.latitude ?? "-"} <br />
+          <span className="font-semibold">Longitude:</span>{" "}
+          {form.location?.longitude ?? "-"}
+        </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 rounded bg-yellow-400 hover:bg-yellow-500 text-gray-900"
+        >
+          Reset
+        </button>
         <button
           onClick={() => router.push("/")}
           className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800"

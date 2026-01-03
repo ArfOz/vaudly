@@ -1,15 +1,20 @@
 "use client"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
-const MiniMap = dynamic(() => import("../components/MiniMap"), { ssr: false })
+const MiniMap = dynamic(() => import("../../components/MiniMap"), {
+  ssr: false,
+})
 
-export default function EditActivityPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function EditActivityPage() {
   const router = useRouter()
+  const params = useParams()
+  const id =
+    typeof params.id === "string"
+      ? params.id
+      : Array.isArray(params.id)
+        ? params.id[0]
+        : ""
   const [activity, setActivity] = useState<any>(null)
   const [form, setForm] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -20,9 +25,9 @@ export default function EditActivityPage({
       setLoading(true)
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/activities/${params.id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/activities/${id}`
         )
-        if (!res.ok) throw new Error("Aktivite bulunamadı")
+        if (!res.ok) throw new Error("Activity not found")
         const data = await res.json()
         setActivity(data)
         setForm(data)
@@ -32,10 +37,10 @@ export default function EditActivityPage({
         setLoading(false)
       }
     }
-    fetchActivity()
-  }, [params.id])
+    if (id) fetchActivity()
+  }, [id])
 
-  if (loading) return <div className="p-8">Yükleniyor...</div>
+  if (loading) return <div className="p-8">Loading...</div>
   if (error) return <div className="p-8 text-red-500">{error}</div>
   if (!form) return null
 
@@ -43,16 +48,16 @@ export default function EditActivityPage({
   const lng = form.location?.longitude ?? 8.2275
 
   const handleSave = async () => {
-    // TODO: API'ye PATCH isteği gönder
-    alert("Kaydet: " + JSON.stringify(form, null, 2))
+    // TODO: send PATCH request to API
+    alert("Save: " + JSON.stringify(form, null, 2))
     router.push("/")
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Etkinlik Düzenle</h1>
+    <div className="max-w-2xl mx-auto p-6 bg-white min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Edit Activity</h1>
       <div className="mb-4">
-        <span className="text-gray-700 block mb-1">Konum</span>
+        <span className="text-gray-700 block mb-1">Location</span>
         <MiniMap
           lat={lat}
           lng={lng}
@@ -74,7 +79,7 @@ export default function EditActivityPage({
           }}
         />
         <div className="text-xs text-gray-500 mt-1">
-          Marker&#39;ı sürükleyerek konumu değiştirebilirsiniz.
+          Drag the marker to change the location.
         </div>
       </div>
       <div className="space-y-3">
@@ -144,13 +149,13 @@ export default function EditActivityPage({
           onClick={() => router.push("/")}
           className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800"
         >
-          İptal
+          Cancel
         </button>
         <button
           onClick={handleSave}
           className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white"
         >
-          Kaydet
+          Save
         </button>
       </div>
     </div>
