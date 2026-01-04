@@ -5,6 +5,7 @@ import dynamic from "next/dynamic"
 const MiniMap = dynamic(() => import("../../components/MiniMap"), {
   ssr: false,
 })
+import { ActivityResponse } from "@vaudly/shared"
 
 export default function EditActivityPage() {
   const router = useRouter()
@@ -15,8 +16,8 @@ export default function EditActivityPage() {
       : Array.isArray(params.id)
         ? params.id[0]
         : ""
-  const [activity, setActivity] = useState<any>(null)
-  const [form, setForm] = useState<any>(null)
+  const [activity, setActivity] = useState<ActivityResponse | null>(null)
+  const [form, setForm] = useState<ActivityResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -28,11 +29,15 @@ export default function EditActivityPage() {
           `${process.env.NEXT_PUBLIC_API_URL}/activities/${id}`
         )
         if (!res.ok) throw new Error("Activity not found")
-        const data = await res.json()
+        const data: ActivityResponse = await res.json()
         setActivity(data)
         setForm(data)
-      } catch (e: any) {
-        setError(e.message)
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("An unknown error occurred")
+        }
       } finally {
         setLoading(false)
       }
@@ -60,41 +65,58 @@ export default function EditActivityPage() {
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white min-h-screen">
       <h1 className="text-2xl font-bold mb-4">Edit Activity</h1>
+      {/* Move MiniMap above the form */}
       <div className="mb-4">
         <span className="text-gray-700 block mb-1">Location</span>
         <MiniMap
           lat={lat}
           lng={lng}
-          onChange={(newLat, newLng) => {
-            setForm((f: any) => ({
-              ...f,
-              location: {
-                ...(f.location || {}),
-                id: f.location?.id || activity?.location?.id || "",
-                latitude: newLat,
-                longitude: newLng,
-                name: f.location?.name ?? activity?.location?.name ?? null,
-                address:
-                  f.location?.address ?? activity?.location?.address ?? null,
-                city: f.location?.city ?? activity?.location?.city ?? null,
-                canton: f.location?.canton ?? activity?.location?.canton ?? "",
-              },
-            }))
+          onChange={(newLat: number, newLng: number) => {
+            setForm((f) =>
+              f
+                ? {
+                    ...f,
+                    location: {
+                      ...(f.location || {}),
+                      id: f.location?.id || activity?.location?.id || "",
+                      latitude: newLat,
+                      longitude: newLng,
+                      name:
+                        f.location?.name ?? activity?.location?.name ?? null,
+                      address:
+                        f.location?.address ??
+                        activity?.location?.address ??
+                        null,
+                      city:
+                        f.location?.city ?? activity?.location?.city ?? null,
+                      canton:
+                        f.location?.canton ?? activity?.location?.canton ?? "",
+                    },
+                  }
+                : f
+            )
           }}
         />
         <div className="text-xs text-gray-500 mt-1">
           Drag the marker to change the location.
         </div>
+        <div className="mt-2 text-sm text-gray-600">
+          <span className="font-semibold">Latitude:</span>{" "}
+          {form.location?.latitude ?? "-"} <br />
+          <span className="font-semibold">Longitude:</span>{" "}
+          {form.location?.longitude ?? "-"}
+        </div>
       </div>
+      {/* Form fields below the map */}
       <div className="space-y-3">
         <label className="block">
           <span className="text-gray-700">Name</span>
           <input
             type="text"
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.name || ""}
+            value={form?.name || ""}
             onChange={(e) =>
-              setForm((f: any) => ({ ...f, name: e.target.value }))
+              setForm((f) => (f ? { ...f, name: e.target.value } : f))
             }
           />
         </label>
@@ -102,9 +124,9 @@ export default function EditActivityPage() {
           <span className="text-gray-700">Description</span>
           <textarea
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.description || ""}
+            value={form?.description || ""}
             onChange={(e) =>
-              setForm((f: any) => ({ ...f, description: e.target.value }))
+              setForm((f) => (f ? { ...f, description: e.target.value } : f))
             }
             rows={2}
           />
@@ -114,14 +136,20 @@ export default function EditActivityPage() {
           <input
             type="text"
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={Array.isArray(form.category) ? form.category.join(", ") : ""}
+            value={
+              Array.isArray(form?.category) ? form?.category.join(", ") : ""
+            }
             onChange={(e) =>
-              setForm((f: any) => ({
-                ...f,
-                category: e.target.value
-                  .split(",")
-                  .map((c: string) => c.trim()),
-              }))
+              setForm((f) =>
+                f
+                  ? {
+                      ...f,
+                      category: e.target.value
+                        .split(",")
+                        .map((c: string) => c.trim()),
+                    }
+                  : f
+              )
             }
           />
         </label>
@@ -130,9 +158,9 @@ export default function EditActivityPage() {
           <input
             type="text"
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.price || ""}
+            value={form?.price || ""}
             onChange={(e) =>
-              setForm((f: any) => ({ ...f, price: e.target.value }))
+              setForm((f) => (f ? { ...f, price: e.target.value } : f))
             }
           />
         </label>
@@ -141,18 +169,12 @@ export default function EditActivityPage() {
           <input
             type="text"
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.date || ""}
+            value={form?.date || ""}
             onChange={(e) =>
-              setForm((f: any) => ({ ...f, date: e.target.value }))
+              setForm((f) => (f ? { ...f, date: e.target.value } : f))
             }
           />
         </label>
-        <div className="mt-2 text-sm text-gray-600">
-          <span className="font-semibold">Latitude:</span>{" "}
-          {form.location?.latitude ?? "-"} <br />
-          <span className="font-semibold">Longitude:</span>{" "}
-          {form.location?.longitude ?? "-"}
-        </div>
       </div>
       <div className="flex justify-end gap-3 mt-6">
         <button

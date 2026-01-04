@@ -1,47 +1,23 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
+import { ActivityResponse } from "@vaudly/shared"
 // MiniMap kaldırıldı, artık kullanılmıyor
 const MapView = dynamic(() => import("./components/MapView"), { ssr: false })
 
-// --- Types ---
-type Location = {
-  id: string
-  name: string | null
-  address: string | null
-  city: string | null
-  canton: string
-  latitude: number | null
-  longitude: number | null
-}
-type Activity = {
-  id: string
-  name: string
-  description: string | null
-  subtitle: string | null
-  date: string | null
-  price: string | null
-  startTime: string | null
-  endTime: string | null
-  createdAt: string
-  updatedAt: string
-  locationId: string
-  location: Location
-  category: string[]
-}
-
 export default function Home() {
-  const [activities, setActivities] = useState<Activity[]>([])
+  const [activities, setActivities] = useState<ActivityResponse[]>([])
   const [loading, setLoading] = useState(true)
   // error state kaldırıldı, kullanılmıyor
   // Drawer state kaldırıldı
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     null
   )
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
-    null
-  )
+  const [selectedActivity, setSelectedActivity] =
+    useState<ActivityResponse | null>(null)
   const activityRefs = useRef<{ [key: string]: HTMLTableRowElement | null }>({})
+  // Replace 'any' with 'unknown' for safer typing, or define a proper type/interface for the MapView ref
+  const mapViewRef = useRef<unknown>(null)
 
   // Fetch activities from API
   const fetchActivities = async () => {
@@ -51,7 +27,7 @@ export default function Home() {
         `${process.env.NEXT_PUBLIC_API_URL}/activities`
       )
       if (!response.ok) throw new Error("Failed to fetch activities")
-      const data = await response.json()
+      const data: ActivityResponse[] = await response.json()
       setActivities(data)
     } catch {
       // Hata durumunda sadece loading'i kapat
@@ -64,7 +40,7 @@ export default function Home() {
     fetchActivities()
   }, [])
 
-  const handleMapActivityClick = (activity: Activity) => {
+  const handleMapActivityClick = (activity: ActivityResponse) => {
     setSelectedActivityId(activity.id)
     setSelectedActivity(activity)
     setTimeout(() => {
@@ -75,9 +51,22 @@ export default function Home() {
     }, 100)
   }
 
-  const handleRowClick = (activity: Activity) => {
+  const handleRowClick = (activity: ActivityResponse) => {
     setSelectedActivityId(activity.id)
     setSelectedActivity(activity)
+  }
+
+  // Map reset function
+  const handleResetMap = () => {
+    if (
+      mapViewRef.current &&
+      typeof (mapViewRef.current as { resetMap?: () => void }).resetMap ===
+        "function"
+    ) {
+      ;(mapViewRef.current as { resetMap: () => void }).resetMap()
+    }
+    setSelectedActivityId(null)
+    setSelectedActivity(null)
   }
 
   if (loading) {
@@ -89,29 +78,38 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-2">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8 text-gray-900">
+        <h1 className="text-2xl font-bold mb-4 text-gray-900">
           Activities Management
         </h1>
-        {/* Responsive yan yana layout */}
-        <div className="flex flex-col lg:flex-row gap-8 min-h-150 h-[90vh]">
-          {/* Sol: Harita */}
-          <div className="bg-white rounded-lg shadow p-4 flex-1 flex flex-col mb-1 lg:mb-0 lg:mr-2 min-h-75 h-[60vh]">
-            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+        {/* Dikey layout, yükseklikler azaltıldı */}
+        <div className="flex flex-col gap-4 min-h-0 h-[calc(100vh-80px)]">
+          {/* Üst: Harita */}
+          <div className="bg-white rounded-lg shadow p-2 flex-1 flex flex-col min-h-0 h-[35vh]">
+            <h2 className="text-lg font-semibold mb-2 text-gray-900">
               Map View
             </h2>
             <div className="flex-1 min-h-0">
               <MapView
+                ref={mapViewRef}
                 activities={activities}
                 onActivityClick={handleMapActivityClick}
                 selectedActivity={selectedActivity}
               />
             </div>
+            <div className="mt-2 flex justify-end">
+              <button
+                className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white text-sm"
+                onClick={handleResetMap}
+              >
+                Reset Map
+              </button>
+            </div>
           </div>
-          {/* Sağ: Liste */}
-          <div className="bg-white rounded-lg shadow overflow-hidden flex-1 flex flex-col min-h-75 h-[60vh]">
-            <h2 className="text-xl font-semibold p-6 border-b border-gray-200 text-gray-900">
+          {/* Alt: Liste */}
+          <div className="bg-white rounded-lg shadow overflow-hidden flex-1 flex flex-col min-h-0 h-[calc(65vh-40px)]">
+            <h2 className="text-lg font-semibold px-4 py-2 border-b border-gray-200 text-gray-900">
               List View
             </h2>
             <div className="overflow-y-auto flex-1">
