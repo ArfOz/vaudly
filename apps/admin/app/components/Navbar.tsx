@@ -15,6 +15,12 @@ export default function Navbar() {
       >
         Activities
       </Link>
+      <Link
+        href="/activities/add"
+        className="text-blue-600 hover:underline font-semibold text-lg"
+      >
+        Add Activity
+      </Link>
     </nav>
   )
 }

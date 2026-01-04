@@ -29,7 +29,7 @@ export interface ActivityResponse {
 export interface CreateActivityDto {
   name: string
   description?: string
-  category?: string
+  category?: string[]
   subtitle?: string
   date?: string
   price?: string
@@ -57,3 +57,26 @@ export interface UpdateActivityDto {
   latitude?: number | null
   longitude?: number | null
 }
+
+// export enum CategoryType {
+//   FARM = "FARM",
+//   GARDEN = "GARDEN",
+//   RESTAURANT = "RESTAURANT",
+//   CAFE = "CAFE",
+//   BAR = "BAR",
+//   MARKET = "MARKET",
+//   SPORTS = "SPORTS",
+//   CULTURE = "CULTURE",
+//   NATURE = "NATURE",
+//   ENTERTAINMENT = "ENTERTAINMENT",
+//   EDUCATION = "EDUCATION",
+//   WELLNESS = "WELLNESS",
+//   FAMILY = "FAMILY",
+//   ADVENTURE = "ADVENTURE",
+//   MUSIC = "MUSIC",
+//   ART = "ART",
+//   FESTIVAL = "FESTIVAL",
+//   SHOPPING = "SHOPPING",
+//   NIGHTLIFE = "NIGHTLIFE",
+//   OTHER = "OTHER",
+// }
