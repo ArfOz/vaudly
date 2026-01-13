@@ -33,7 +33,7 @@ export class ActivitiesDatabaseService {
     });
   }
 
-  async create(data: Prisma.ActivityCreateInput) {
+  async create({ data }: { data: Prisma.ActivityCreateInput }) {
     return await this.prisma.activity.create({ data });
   }
 
