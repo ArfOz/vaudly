@@ -36,12 +36,6 @@ export class CreateLocationNestedDto {
   @IsOptional()
   @Type(() => CreateLocationDto)
   create?: CreateLocationDto;
-
-  @IsOptional()
-  connectOrCreate?: any; // Gerekirse detaylandırılır
-
-  @IsOptional()
-  connect?: any; // Gerekirse detaylandırılır
 }
 
 export class CreateActivityDto {

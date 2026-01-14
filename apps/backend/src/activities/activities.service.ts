@@ -21,7 +21,7 @@ export class ActivitiesService {
   async create(input: CreateActivityDto) {
     const data: Prisma.ActivityCreateInput = input;
 
-    return await this.activitiesDatabaseService.create(data);
+    return await this.activitiesDatabaseService.create({ data });
   }
 
   async update(
