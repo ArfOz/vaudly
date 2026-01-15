@@ -26,21 +26,38 @@ export interface ActivityResponse {
   category: string[]
 }
 
-export interface CreateActivityDto {
-  name: string
-  description?: string
-  category?: string[]
-  subtitle?: string
-  date?: string
-  price?: string
-  startTime?: string
-  endTime?: string
-  locationId?: string
-  address?: string
-  city?: string
-  latitude?: number
-  longitude?: number
+export interface CreateLocationDto {
+  name?: string | null;
+  address?: string | null;
+  city?: string | null;
+  canton?: 'VD';
+  latitude?: number | null;
+  longitude?: number | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
+
+export interface CreateLocationNestedDto {
+  create?: CreateLocationDto;
+}
+
+
+export interface CreateActivityDto {
+  name: string;
+  description?: string | null;
+  subtitle?: string | null;
+  date?: string | null;
+  price?: string | null;
+  category?: string[];
+  startTime?: Date | string | null;
+  endTime?: Date | string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  location: CreateLocationNestedDto;
+}
+
+
+
 
 export interface UpdateActivityDto {
   name?: string
