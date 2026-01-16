@@ -2,7 +2,7 @@
 import { useRouter, useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
-const MiniMap = dynamic(() => import("../../components/MiniMap"), {
+const MiniMap = dynamic(() => import("../components/MiniMap"), {
   ssr: false,
 })
 

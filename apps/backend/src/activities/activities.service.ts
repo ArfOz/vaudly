@@ -46,6 +46,13 @@ export class ActivitiesService {
   }
 
   async remove(id: string) {
+    if(!id) {
+      throw new Error('Invalid activity ID');
+    }
+    const activity = await this.activitiesDatabaseService.findById(id);
+    if(!activity) {
+      throw new Error('Activity not found');
+    }
     return await this.activitiesDatabaseService.remove(id);
   }
 }
