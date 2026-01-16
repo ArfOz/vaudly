@@ -51,20 +51,27 @@ export default function AddActivityPage() {
           },
         },
       }))
-    } else if (name === "category") {
-      setForm((prev) => ({
-        ...prev,
-        category: value
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean),
-      }))
-    } else {
+    }
+    else {
+      if (name === "category") return
       setForm((prev) => ({
         ...prev,
         [name]: value,
       }))
-    }
+    } 
+  }
+
+  const toggleCategory = (cat: string) => {
+    setForm((prev) => {
+      const prevCats = prev.category ?? []
+      const exists = prevCats.includes(cat)
+      return {
+        ...prev,
+        category: exists
+          ? prevCats.filter((c) => c !== cat)
+          : [...prevCats, cat],
+      }
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,16 +154,24 @@ export default function AddActivityPage() {
             rows={2}
           />
         </label>
-        <label className="block">
-          <span className="text-gray-700">Category (comma separated)</span>
-          <input
-            name="category"
-            type="text"
-            className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={(form.category ?? []).join(", ")}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="block">
+          <span className="text-gray-700">Category</span>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {Object.values(CategoryType).map((cat) => (
+              <label key={cat} className="inline-flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="category"
+                  value={cat}
+                  checked={(form.category ?? []).includes(cat)}
+                  onChange={() => toggleCategory(cat)}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-gray-700">{cat}</span>
+              </label>
+            ))}
+          </div>
+        </div>
         <label className="block">
           <span className="text-gray-700">Price</span>
           <input
