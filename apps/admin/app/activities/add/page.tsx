@@ -17,13 +17,15 @@ export default function AddActivityPage() {
     price: "",
     date: "",
     location: {
+    create:
+    {
       name: "",
       address: "",
       city: "",
-      canton: "",
+      canton: "VD",
       latitude: null,
       longitude: null,
-    },
+    }},
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -32,34 +34,44 @@ export default function AddActivityPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
-    if (name.startsWith("location.")) {
-      const locField = name.replace("location.", "")
+    if (name.startsWith("location.create.")) {
+      const locField = name.replace("location.create.", "")
       setForm((prev) => ({
         ...prev,
         location: {
-          ...prev.location,
-          [locField]:
-            locField === "latitude" || locField === "longitude"
-              ? value === ""
-                ? null
-                : parseFloat(value)
-              : value,
+          ...(prev.location ?? {}),
+          create: {
+            ...((prev.location)?.create ?? {}),
+            [locField]:
+              locField === "latitude" || locField === "longitude"
+                ? value === ""
+                  ? null
+                  : parseFloat(value)
+                : value,
+          },
         },
       }))
-    } else if (name === "category") {
-      setForm((prev) => ({
-        ...prev,
-        category: value
-          .split(",")
-          .map((c) => c.trim())
-          .filter(Boolean),
-      }))
-    } else {
+    }
+    else {
+      if (name === "category") return
       setForm((prev) => ({
         ...prev,
         [name]: value,
       }))
-    }
+    } 
+  }
+
+  const toggleCategory = (cat: string) => {
+    setForm((prev) => {
+      const prevCats = prev.category ?? []
+      const exists = prevCats.includes(cat)
+      return {
+        ...prev,
+        category: exists
+          ? prevCats.filter((c) => c !== cat)
+          : [...prevCats, cat],
+      }
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,8 +86,12 @@ export default function AddActivityPage() {
       })
       if (!res.ok) throw new Error("Failed to add activity")
       router.push("/activities")
-    } catch (e: any) {
-      setError(e.message || "Unknown error")
+    } catch (e: unknown) {
+      if (e instanceof Error) {
+        setError(e.message)
+      } else {
+        setError("Unknown error")
+      }
     } finally {
       setLoading(false)
     }
@@ -90,15 +106,18 @@ export default function AddActivityPage() {
           Location (select on map)
         </span>
         <MiniMap
-          lat={form.location.latitude ?? 46.8182}
-          lng={form.location.longitude ?? 8.2275}
+            lat={(form.location )?.create?.latitude ?? 46.8182}
+            lng={(form.location )?.create?.longitude ?? 8.2275}
           onChange={(newLat: number, newLng: number) => {
             setForm((prev) => ({
               ...prev,
               location: {
-                ...prev.location,
-                latitude: newLat,
-                longitude: newLng,
+                  ...(prev.location ?? {}),
+                  create: {
+                    ...((prev.location )?.create ?? {}),
+                    latitude: newLat,
+                    longitude: newLng,
+                  },
               },
             }))
           }}
@@ -108,9 +127,9 @@ export default function AddActivityPage() {
         </div>
         <div className="mt-2 text-sm text-gray-600">
           <span className="font-semibold">Latitude:</span>{" "}
-          {form.location.latitude ?? "-"} <br />
+          {(form.location)?.create?.latitude ?? "-"} <br />
           <span className="font-semibold">Longitude:</span>{" "}
-          {form.location.longitude ?? "-"}
+          {form.location?.create?.longitude ?? "-"}
         </div>
       </div>
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -130,21 +149,29 @@ export default function AddActivityPage() {
           <textarea
             name="description"
             className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.description}
+            value={form.description ?? ""}
             onChange={handleChange}
             rows={2}
           />
         </label>
-        <label className="block">
-          <span className="text-gray-700">Category (comma separated)</span>
-          <input
-            name="category"
-            type="text"
-            className="mt-1 block w-full border rounded px-2 py-1 text-gray-900"
-            value={form.category.join(", ")}
-            onChange={handleChange}
-          />
-        </label>
+        <div className="block">
+          <span className="text-gray-700">Category</span>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {Object.values(CategoryType).map((cat) => (
+              <label key={cat} className="inline-flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  name="category"
+                  value={cat}
+                  checked={(form.category ?? []).includes(cat)}
+                  onChange={() => toggleCategory(cat)}
+                  className="h-4 w-4 text-blue-600"
+                />
+                <span className="text-sm text-gray-700">{cat}</span>
+              </label>
+            ))}
+          </div>
+        </div>
         <label className="block">
           <span className="text-gray-700">Price</span>
           <input
@@ -171,53 +198,53 @@ export default function AddActivityPage() {
           </span>
           <div className="grid grid-cols-2 gap-2">
             <input
-              name="location.name"
+              name="location.create.name"
               type="text"
               placeholder="Name"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.name || ""}
+              value={form.location.create?.name || ""}
               onChange={handleChange}
             />
             <input
-              name="location.address"
+              name="location.create.address"
               type="text"
               placeholder="Address"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.address || ""}
+              value={form.location.create?.address || ""}
               onChange={handleChange}
             />
             <input
-              name="location.city"
+              name="location.create.city"
               type="text"
               placeholder="City"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.city || ""}
+              value={form.location.create?.city || ""}
               onChange={handleChange}
             />
             <input
-              name="location.canton"
+              name="location.create.canton"
               type="text"
               placeholder="Canton"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.canton || ""}
+              value={form.location.create?.canton || ""}
               onChange={handleChange}
             />
             <input
-              name="location.latitude"
+              name="location.create.latitude"
               type="number"
               step="any"
               placeholder="Latitude"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.latitude ?? ""}
+              value={form.location.create?.latitude ?? ""}
               onChange={handleChange}
             />
             <input
-              name="location.longitude"
+              name="location.create.longitude"
               type="number"
               step="any"
               placeholder="Longitude"
               className="block w-full border rounded px-2 py-1 text-gray-900"
-              value={form.location.longitude ?? ""}
+              value={form.location.create?.longitude ?? ""}
               onChange={handleChange}
             />
           </div>

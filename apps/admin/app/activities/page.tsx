@@ -2,14 +2,14 @@
 import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { ActivityResponse } from "@vaudly/shared"
-// MiniMap kaldırıldı, artık kullanılmıyor
+// MiniMap removed, no longer used
 const MapView = dynamic(() => import("../components/MapView"), { ssr: false })
 
 export default function Home() {
   const [activities, setActivities] = useState<ActivityResponse[]>([])
   const [loading, setLoading] = useState(true)
-  // error state kaldırıldı, kullanılmıyor
-  // Drawer state kaldırıldı
+  // Error state removed, not used
+  // Drawer state removed
   const [selectedActivityId, setSelectedActivityId] = useState<string | null>(
     null
   )
@@ -30,7 +30,7 @@ export default function Home() {
       const data: ActivityResponse[] = await response.json()
       setActivities(data)
     } catch {
-      // Hata durumunda sadece loading'i kapat
+      // On error, only disable loading
     } finally {
       setLoading(false)
     }
@@ -83,9 +83,9 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-4 text-gray-900">
           Activities Management
         </h1>
-        {/* Dikey layout, yükseklikler azaltıldı */}
+        {/* Vertical layout, reduced heights */}
         <div className="flex flex-col gap-4 min-h-0 h-[calc(100vh-80px)]">
-          {/* Üst: Harita */}
+          {/* Top: Map */}
           <div className="bg-white rounded-lg shadow p-2 flex-1 flex flex-col min-h-0 h-[35vh]">
             <h2 className="text-lg font-semibold mb-2 text-gray-900">
               Map View
@@ -107,7 +107,7 @@ export default function Home() {
               </button>
             </div>
           </div>
-          {/* Alt: Liste */}
+          {/* Bottom: List */}
           <div className="bg-white rounded-lg shadow overflow-hidden flex-1 flex flex-col min-h-0 h-[calc(65vh-40px)]">
             <h2 className="text-lg font-semibold px-4 py-2 border-b border-gray-200 text-gray-900">
               List View
@@ -165,7 +165,7 @@ export default function Home() {
                       <td className="px-2 py-4 text-center">
                         <button
                           type="button"
-                          aria-label="Haritada göster"
+                          aria-label="Show on map"
                           className="text-green-600 hover:text-green-800 focus:outline-none"
                           style={{ fontSize: 20 }}
                           onClick={(e) => {

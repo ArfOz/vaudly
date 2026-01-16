@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateActivityDto } from './dtos';
-import { ActivitiesDatabaseService } from '../database/activites';
+import { ActivitiesDatabaseService } from '../database/activities';
 import { ActivityResponse } from '@vaudly/shared';
 import { Prisma } from '@vaudly/database';
 
@@ -46,6 +46,13 @@ export class ActivitiesService {
   }
 
   async remove(id: string) {
+    if(!id) {
+      throw new Error('Invalid activity ID');
+    }
+    const activity = await this.activitiesDatabaseService.findById(id);
+    if(!activity) {
+      throw new Error('Activity not found');
+    }
     return await this.activitiesDatabaseService.remove(id);
   }
 }
