@@ -63,7 +63,6 @@ export class ActivitiesController {
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    console.log('ActivitiesController.remove called with id:', id);
     return await this.activities.remove(id);
   }
 }

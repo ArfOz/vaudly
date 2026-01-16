@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateActivityDto } from './dtos';
-import { ActivitiesDatabaseService } from '../database/activites';
+import { ActivitiesDatabaseService } from '../database/activities';
 import { ActivityResponse } from '@vaudly/shared';
 import { Prisma } from '@vaudly/database';
 
@@ -21,7 +21,7 @@ export class ActivitiesService {
   async create(input: CreateActivityDto) {
     const data: Prisma.ActivityCreateInput = input;
 
-    return await this.activitiesDatabaseService.create({ data });
+    return await this.activitiesDatabaseService.create(data);
   }
 
   async update(

@@ -1,8 +1,8 @@
-import { ActivitiesDatabaseService } from './../database/activites/activities.database.service';
+import { ActivitiesDatabaseService } from '../database/activities/activities.database.service';
 import { Module } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
 import { ActivitiesController } from './activities.controller';
-import { ActivitiesDatabaseModule } from '../database/activites';
+import { ActivitiesDatabaseModule } from '../database/activities';
 import { PrismaService } from '../database/prisma';
 
 @Module({
