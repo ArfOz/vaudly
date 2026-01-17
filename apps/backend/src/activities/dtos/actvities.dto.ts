@@ -1,7 +1,7 @@
 import { IsOptional, IsString, IsNotEmpty, IsEnum } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CategoryType } from '@vaudly/database';
-// Önce Nested DTO tanımı
+
 
 export class CreateLocationDto {
   @IsString()
@@ -36,15 +36,6 @@ export class CreateLocationNestedDto {
   @IsOptional()
   @Type(() => CreateLocationDto)
   create?: CreateLocationDto;
-<<<<<<< HEAD
-=======
-
-  @IsOptional()
-  connectOrCreate?: any; // Gerekirse detaylandırılır
-
-  @IsOptional()
-  connect?: any; // Gerekirse detaylandırılır
->>>>>>> 63055c3725add856121cfa3950d3f1d141d0873e
 }
 
 export class CreateActivityDto {
