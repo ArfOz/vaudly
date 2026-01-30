@@ -1,12 +1,13 @@
+import "../global.css"
+import { StatusBar } from "expo-status-bar"
+import "react-native-reanimated"
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native"
+// @ts-ignore - expo-router provides Stack at runtime but its d.ts is not recognized as a module here
 import { Stack } from "expo-router"
-import { StatusBar } from "expo-status-bar"
-import "react-native-reanimated"
-import "../global.css"
 
 // Update the import path to a relative path if the hook exists locally
 import { useColorScheme } from "../hooks/use-color-scheme"
