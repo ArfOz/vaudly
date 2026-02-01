@@ -1,7 +1,12 @@
-import { IsOptional, IsString, IsNotEmpty, IsEnum, IsArray } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CategoryType } from '@vaudly/database';
-
 
 export class CreateLocationDto {
   @IsString()
