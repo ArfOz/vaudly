@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty, IsEnum, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CategoryType } from '@vaudly/database';
 
@@ -60,7 +60,9 @@ export class CreateActivityDto {
   price?: string | null | undefined;
 
   @IsOptional()
-  category?: string[] | undefined;
+  @IsArray()
+  @IsEnum(CategoryType, { each: true })
+  category?: CategoryType[] | undefined;
 
   @IsOptional()
   startTime?: Date | string | null;

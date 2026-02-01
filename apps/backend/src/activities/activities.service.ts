@@ -19,7 +19,11 @@ export class ActivitiesService {
   }
 
   async create(input: CreateActivityDto) {
-    const data: Prisma.ActivityCreateInput = input;
+    if (!input || !input.name) {
+      throw new Error('Invalid activity data: "name" is required');
+    }
+
+    const data = input as unknown as Prisma.ActivityCreateInput;
 
     return await this.activitiesDatabaseService.create(data);
   }
@@ -46,11 +50,11 @@ export class ActivitiesService {
   }
 
   async remove(id: string) {
-    if(!id) {
+    if (!id) {
       throw new Error('Invalid activity ID');
     }
     const activity = await this.activitiesDatabaseService.findById(id);
-    if(!activity) {
+    if (!activity) {
       throw new Error('Activity not found');
     }
     return await this.activitiesDatabaseService.remove(id);
