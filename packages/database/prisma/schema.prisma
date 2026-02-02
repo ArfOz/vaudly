@@ -87,7 +87,7 @@ model Activity {
   subtitle    String?
   date        String?
   price       String?
-  category    String[]  @default([])
+  category    CategoryType[]  @default([])
   startTime   DateTime?
   endTime     DateTime?
   createdAt   DateTime  @default(now())

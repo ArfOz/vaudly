@@ -195,6 +195,7 @@ exports.Prisma.NullsOrder = {
 };
 exports.CategoryType = exports.$Enums.CategoryType = {
   FARM: 'FARM',
+  MUSEUM: 'MUSEUM',
   GARDEN: 'GARDEN',
   RESTAURANT: 'RESTAURANT',
   CAFE: 'CAFE',

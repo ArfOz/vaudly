@@ -89,5 +89,6 @@ export class CreateActivityDto {
 export class GetActivitiesDto {
   @IsOptional()
   @IsEnum(CategoryType, { each: true })
+  @IsArray()
   categories?: CategoryType[];
 }
