@@ -19,11 +19,11 @@ export class ActivitiesDatabaseService {
       include: include ? { location: true } : undefined,
       orderBy: orderBy ? { startTime: 'asc' } : undefined,
       take: 100,
-      where: where ? where : {}
+      where: where ? where : {},
     };
 
     try {
-      const result = await this.prisma.activity!.findMany(args);
+      const result = await this.prisma.activity.findMany(args);
       return result ?? [];
     } catch (error) {
       // fail safe: return empty list on error

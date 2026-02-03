@@ -13,9 +13,17 @@ export class ActivitiesService {
   async listActivities(
     categories?: CategoryType[],
   ): Promise<ActivityResponse[] | null> {
-    const where = categories && categories.length > 0 ? { category: { hasSome: categories } } : undefined;
-    const result = await this.activitiesDatabaseService.list({ where, include: true, orderBy: true as any });
-    return (result as unknown) as ActivityResponse[] | null;
+    const where: Prisma.ActivityWhereInput = categories
+      ? {
+          category: { hasSome: categories },
+        }
+      : {};
+    const result = await this.activitiesDatabaseService.list({
+      where,
+      include: { location: true },
+      orderBy: { startTime: 'asc' },
+    });
+    return result as unknown as ActivityResponse[] | null;
   }
 
   async findById(id: string) {

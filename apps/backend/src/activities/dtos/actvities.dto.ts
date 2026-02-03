@@ -8,6 +8,9 @@ import {
 import { Type } from 'class-transformer';
 import { CategoryType } from '@vaudly/database';
 
+enum Canton {
+  VD = 'VD',
+}
 export class CreateLocationDto {
   @IsString()
   @IsOptional()
@@ -20,10 +23,6 @@ export class CreateLocationDto {
   @IsString()
   @IsOptional()
   city?: string | null;
-
-  export enum Canton {
-    VD = 'VD',
-  }
 
   @IsEnum(Canton)
   @IsOptional()
