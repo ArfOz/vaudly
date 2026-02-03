@@ -14,6 +14,7 @@ enum Canton {
 
 enum CategoryType {
   FARM
+  MUSEUM
   GARDEN
   RESTAURANT
   CAFE
@@ -80,17 +81,17 @@ model Location {
 }
 
 model Activity {
-  id          String    @id @default(cuid())
-  name        String    @unique
+  id          String         @id @default(cuid())
+  name        String         @unique
   description String?
   subtitle    String?
   date        String?
   price       String?
-  category    String[]  @default([])
+  category    CategoryType[] @default([])
   startTime   DateTime?
   endTime     DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
   locationId String
   location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)

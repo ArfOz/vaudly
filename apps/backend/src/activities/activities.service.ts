@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateActivityDto } from './dtos';
 import { ActivitiesDatabaseService } from '../database/activities';
 import { ActivityResponse } from '@vaudly/shared';
-import { Prisma } from '@vaudly/database';
+import { CategoryType, Prisma } from '@vaudly/database';
 
 @Injectable()
 export class ActivitiesService {
@@ -10,8 +10,20 @@ export class ActivitiesService {
     private readonly activitiesDatabaseService: ActivitiesDatabaseService,
   ) {}
 
-  async listActivities(categories?: string[]): Promise<ActivityResponse[]> {
-    return await this.activitiesDatabaseService.list(categories);
+  async listActivities(
+    categories?: CategoryType[],
+  ): Promise<ActivityResponse[] | null> {
+    const where: Prisma.ActivityWhereInput = categories
+      ? {
+          category: { hasSome: categories },
+        }
+      : {};
+    const result = await this.activitiesDatabaseService.list({
+      where,
+      include: { location: true },
+      orderBy: { startTime: 'asc' },
+    });
+    return result as unknown as ActivityResponse[] | null;
   }
 
   async findById(id: string) {
@@ -19,7 +31,11 @@ export class ActivitiesService {
   }
 
   async create(input: CreateActivityDto) {
-    const data: Prisma.ActivityCreateInput = input;
+    if (!input || !input.name) {
+      throw new Error('Invalid activity data: "name" is required');
+    }
+
+    const data = input as unknown as Prisma.ActivityCreateInput;
 
     return await this.activitiesDatabaseService.create(data);
   }
@@ -29,7 +45,7 @@ export class ActivitiesService {
     input: {
       name?: string;
       description?: string | null;
-      category?: string[];
+      category?: CategoryType[];
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;
@@ -46,11 +62,11 @@ export class ActivitiesService {
   }
 
   async remove(id: string) {
-    if(!id) {
+    if (!id) {
       throw new Error('Invalid activity ID');
     }
     const activity = await this.activitiesDatabaseService.findById(id);
-    if(!activity) {
+    if (!activity) {
       throw new Error('Activity not found');
     }
     return await this.activitiesDatabaseService.remove(id);

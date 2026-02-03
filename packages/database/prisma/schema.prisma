@@ -14,6 +14,7 @@ enum Canton {
 
 enum CategoryType {
   FARM
+  MUSEUM
   GARDEN
   RESTAURANT
   CAFE
@@ -86,7 +87,7 @@ model Activity {
   subtitle    String?
   date        String?
   price       String?
-  category    String[]  @default([])
+  category    CategoryType[]  @default([])
   startTime   DateTime?
   endTime     DateTime?
   createdAt   DateTime  @default(now())

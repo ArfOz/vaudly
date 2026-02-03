@@ -1,8 +1,16 @@
-import { IsOptional, IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsEnum,
+  IsArray,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { CategoryType } from '@vaudly/database';
 
-
+enum Canton {
+  VD = 'VD',
+}
 export class CreateLocationDto {
   @IsString()
   @IsOptional()
@@ -16,9 +24,9 @@ export class CreateLocationDto {
   @IsOptional()
   city?: string | null;
 
-  @IsEnum(['VD'])
+  @IsEnum(Canton)
   @IsOptional()
-  canton?: 'VD'; // Gerekirse enum genişletilebilir
+  canton?: Canton; // Gerekirse enum genişletilebilir
 
   @IsOptional()
   latitude?: number | null;
@@ -60,7 +68,9 @@ export class CreateActivityDto {
   price?: string | null | undefined;
 
   @IsOptional()
-  category?: string[] | undefined;
+  @IsArray()
+  @IsEnum(CategoryType, { each: true })
+  category?: CategoryType[] | undefined;
 
   @IsOptional()
   startTime?: Date | string | null;
@@ -82,5 +92,6 @@ export class CreateActivityDto {
 export class GetActivitiesDto {
   @IsOptional()
   @IsEnum(CategoryType, { each: true })
+  @IsArray()
   categories?: CategoryType[];
 }
