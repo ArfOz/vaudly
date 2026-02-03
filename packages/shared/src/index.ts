@@ -23,7 +23,7 @@ export interface ActivityResponse {
   createdAt: Date
   updatedAt: Date
   locationId: string
-  location: Location
+  location: Location | null
   category: CategoryType[]
 }
 

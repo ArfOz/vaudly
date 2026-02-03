@@ -21,9 +21,13 @@ export class CreateLocationDto {
   @IsOptional()
   city?: string | null;
 
-  @IsEnum(['VD'])
+  export enum Canton {
+    VD = 'VD',
+  }
+
+  @IsEnum(Canton)
   @IsOptional()
-  canton?: 'VD'; // Gerekirse enum genişletilebilir
+  canton?: Canton; // Gerekirse enum genişletilebilir
 
   @IsOptional()
   latitude?: number | null;

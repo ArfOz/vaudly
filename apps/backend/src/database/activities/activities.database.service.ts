@@ -1,27 +1,34 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma';
-import { Prisma } from '@vaudly/database';
+import { Prisma, Activity, CategoryType } from '@vaudly/database';
 
 @Injectable()
 export class ActivitiesDatabaseService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(categories?: string[]) {
-    return await this.prisma.activity.findMany({
-      where: categories
-        ? {
-            category: {
-              hasSome: categories,
-            },
-          }
-        : undefined,
-      include: {
-        location: true,
-      },
-      orderBy: { startTime: 'asc' },
+  async list({
+    where,
+    include,
+    orderBy,
+  }: {
+    where?: Prisma.ActivityWhereInput;
+    include?: Prisma.ActivityInclude;
+    orderBy?: Prisma.ActivityOrderByWithRelationInput;
+  }): Promise<Activity[]> {
+    const args: Prisma.ActivityFindManyArgs = {
+      include: include ? { location: true } : undefined,
+      orderBy: orderBy ? { startTime: 'asc' } : undefined,
       take: 100,
-    });
+      where: where ? where : {}
+    };
+
+    try {
+      const result = await this.prisma.activity!.findMany(args);
+      return result ?? [];
+    } catch (error) {
+      // fail safe: return empty list on error
+      return [];
+    }
   }
 
   async findById(id: string) {
@@ -42,7 +49,7 @@ export class ActivitiesDatabaseService {
     input: {
       name?: string;
       description?: string | null;
-      category?: string[];
+      category?: CategoryType[];
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;

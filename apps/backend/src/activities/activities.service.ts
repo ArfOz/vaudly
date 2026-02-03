@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateActivityDto } from './dtos';
 import { ActivitiesDatabaseService } from '../database/activities';
 import { ActivityResponse } from '@vaudly/shared';
-import { Prisma } from '@vaudly/database';
+import { CategoryType, Prisma } from '@vaudly/database';
 
 @Injectable()
 export class ActivitiesService {
@@ -10,8 +10,12 @@ export class ActivitiesService {
     private readonly activitiesDatabaseService: ActivitiesDatabaseService,
   ) {}
 
-  async listActivities(categories?: string[]): Promise<ActivityResponse[]> {
-    return await this.activitiesDatabaseService.list(categories);
+  async listActivities(
+    categories?: CategoryType[],
+  ): Promise<ActivityResponse[] | null> {
+    const where = categories && categories.length > 0 ? { category: { hasSome: categories } } : undefined;
+    const result = await this.activitiesDatabaseService.list({ where, include: true, orderBy: true as any });
+    return (result as unknown) as ActivityResponse[] | null;
   }
 
   async findById(id: string) {
@@ -33,7 +37,7 @@ export class ActivitiesService {
     input: {
       name?: string;
       description?: string | null;
-      category?: string[];
+      category?: CategoryType[];
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;
