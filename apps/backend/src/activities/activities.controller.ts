@@ -45,7 +45,7 @@ export class ActivitiesController {
     body: {
       name?: string;
       description?: string | null;
-      category?: string[];
+      category?: CategoryType[];
       subtitle?: string | null;
       date?: string | null;
       price?: string | null;
