@@ -1,1 +1,1 @@
-export * from './actvities.dto';
+export * from './activities.dto';

@@ -47,6 +47,7 @@ export type Canton = (typeof Canton)[keyof typeof Canton]
 
 export const CategoryType: {
   FARM: 'FARM',
+  MUSEUM: 'MUSEUM',
   GARDEN: 'GARDEN',
   RESTAURANT: 'RESTAURANT',
   CAFE: 'CAFE',
@@ -4594,7 +4595,7 @@ export namespace Prisma {
     subtitle: string | null
     date: string | null
     price: string | null
-    category: string[]
+    category: $Enums.CategoryType[]
     startTime: Date | null
     endTime: Date | null
     createdAt: Date
@@ -4705,7 +4706,7 @@ export namespace Prisma {
       subtitle: string | null
       date: string | null
       price: string | null
-      category: string[]
+      category: $Enums.CategoryType[]
       startTime: Date | null
       endTime: Date | null
       createdAt: Date
@@ -5141,7 +5142,7 @@ export namespace Prisma {
     readonly subtitle: FieldRef<"Activity", 'String'>
     readonly date: FieldRef<"Activity", 'String'>
     readonly price: FieldRef<"Activity", 'String'>
-    readonly category: FieldRef<"Activity", 'String[]'>
+    readonly category: FieldRef<"Activity", 'CategoryType[]'>
     readonly startTime: FieldRef<"Activity", 'DateTime'>
     readonly endTime: FieldRef<"Activity", 'DateTime'>
     readonly createdAt: FieldRef<"Activity", 'DateTime'>
@@ -6006,7 +6007,7 @@ export namespace Prisma {
     subtitle?: StringNullableFilter<"Activity"> | string | null
     date?: StringNullableFilter<"Activity"> | string | null
     price?: StringNullableFilter<"Activity"> | string | null
-    category?: StringNullableListFilter<"Activity">
+    category?: EnumCategoryTypeNullableListFilter<"Activity">
     startTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     createdAt?: DateTimeFilter<"Activity"> | Date | string
@@ -6041,7 +6042,7 @@ export namespace Prisma {
     subtitle?: StringNullableFilter<"Activity"> | string | null
     date?: StringNullableFilter<"Activity"> | string | null
     price?: StringNullableFilter<"Activity"> | string | null
-    category?: StringNullableListFilter<"Activity">
+    category?: EnumCategoryTypeNullableListFilter<"Activity">
     startTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     createdAt?: DateTimeFilter<"Activity"> | Date | string
@@ -6078,7 +6079,7 @@ export namespace Prisma {
     subtitle?: StringNullableWithAggregatesFilter<"Activity"> | string | null
     date?: StringNullableWithAggregatesFilter<"Activity"> | string | null
     price?: StringNullableWithAggregatesFilter<"Activity"> | string | null
-    category?: StringNullableListFilter<"Activity">
+    category?: EnumCategoryTypeNullableListFilter<"Activity">
     startTime?: DateTimeNullableWithAggregatesFilter<"Activity"> | Date | string | null
     endTime?: DateTimeNullableWithAggregatesFilter<"Activity"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Activity"> | Date | string
@@ -6328,7 +6329,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -6343,7 +6344,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -6358,7 +6359,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6373,7 +6374,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6388,7 +6389,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -6403,7 +6404,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6417,7 +6418,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6791,11 +6792,11 @@ export namespace Prisma {
     _max?: NestedFloatNullableFilter<$PrismaModel>
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+  export type EnumCategoryTypeNullableListFilter<$PrismaModel = never> = {
+    equals?: $Enums.CategoryType[] | ListEnumCategoryTypeFieldRefInput<$PrismaModel> | null
+    has?: $Enums.CategoryType | EnumCategoryTypeFieldRefInput<$PrismaModel> | null
+    hasEvery?: $Enums.CategoryType[] | ListEnumCategoryTypeFieldRefInput<$PrismaModel>
+    hasSome?: $Enums.CategoryType[] | ListEnumCategoryTypeFieldRefInput<$PrismaModel>
     isEmpty?: boolean
   }
 
@@ -6926,7 +6927,7 @@ export namespace Prisma {
   }
 
   export type ActivityCreatecategoryInput = {
-    set: string[]
+    set: $Enums.CategoryType[]
   }
 
   export type LocationCreateNestedOneWithoutActivitiesInput = {
@@ -6936,8 +6937,8 @@ export namespace Prisma {
   }
 
   export type ActivityUpdatecategoryInput = {
-    set?: string[]
-    push?: string | string[]
+    set?: $Enums.CategoryType[]
+    push?: $Enums.CategoryType | $Enums.CategoryType[]
   }
 
   export type LocationUpdateOneRequiredWithoutActivitiesNestedInput = {
@@ -7186,7 +7187,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7200,7 +7201,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7243,7 +7244,7 @@ export namespace Prisma {
     subtitle?: StringNullableFilter<"Activity"> | string | null
     date?: StringNullableFilter<"Activity"> | string | null
     price?: StringNullableFilter<"Activity"> | string | null
-    category?: StringNullableListFilter<"Activity">
+    category?: EnumCategoryTypeNullableListFilter<"Activity">
     startTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     endTime?: DateTimeNullableFilter<"Activity"> | Date | string | null
     createdAt?: DateTimeFilter<"Activity"> | Date | string
@@ -7322,7 +7323,7 @@ export namespace Prisma {
     subtitle?: string | null
     date?: string | null
     price?: string | null
-    category?: ActivityCreatecategoryInput | string[]
+    category?: ActivityCreatecategoryInput | $Enums.CategoryType[]
     startTime?: Date | string | null
     endTime?: Date | string | null
     createdAt?: Date | string
@@ -7336,7 +7337,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7350,7 +7351,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7364,7 +7365,7 @@ export namespace Prisma {
     subtitle?: NullableStringFieldUpdateOperationsInput | string | null
     date?: NullableStringFieldUpdateOperationsInput | string | null
     price?: NullableStringFieldUpdateOperationsInput | string | null
-    category?: ActivityUpdatecategoryInput | string[]
+    category?: ActivityUpdatecategoryInput | $Enums.CategoryType[]
     startTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     endTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
