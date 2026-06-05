@@ -1,5 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { CreateActivityDto } from './dtos';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateActivityDto, UpdateActivityDto } from './dtos';
 import { ActivitiesDatabaseService } from '../database/activities';
 import { ActivityResponse } from '@vaudly/shared';
 import { CategoryType, Prisma } from '@vaudly/database';
@@ -27,47 +31,45 @@ export class ActivitiesService {
   }
 
   async findById(id: string) {
-    return await this.activitiesDatabaseService.findById(id);
+    const activity = await this.activitiesDatabaseService.findById(id);
+    if (!activity) {
+      throw new NotFoundException(`Activity with id "${id}" not found`);
+    }
+    return activity;
   }
 
   async create(input: CreateActivityDto) {
-    if (!input || !input.name) {
-      throw new Error('Invalid activity data: "name" is required');
-    }
-
-    const data = input as unknown as Prisma.ActivityCreateInput;
+    const data: Prisma.ActivityCreateInput = {
+      name: input.name,
+      description: input.description,
+      subtitle: input.subtitle,
+      date: input.date,
+      price: input.price,
+      category: input.category ?? [],
+      startTime: input.startTime ? new Date(input.startTime) : undefined,
+      endTime: input.endTime ? new Date(input.endTime) : undefined,
+      location:
+        input.location as Prisma.LocationCreateNestedOneWithoutActivitiesInput,
+    };
 
     return await this.activitiesDatabaseService.create(data);
   }
 
-  async update(
-    id: string,
-    input: {
-      name?: string;
-      description?: string | null;
-      category?: CategoryType[];
-      subtitle?: string | null;
-      date?: string | null;
-      price?: string | null;
-      startTime?: string | null;
-      endTime?: string | null;
-      locationId?: string | null;
-      address?: string | null;
-      city?: string | null;
-      latitude?: number | null;
-      longitude?: number | null;
-    },
-  ) {
+  async update(id: string, input: UpdateActivityDto) {
+    const existing = await this.activitiesDatabaseService.findById(id);
+    if (!existing) {
+      throw new NotFoundException(`Activity with id "${id}" not found`);
+    }
     return await this.activitiesDatabaseService.update(id, input);
   }
 
   async remove(id: string) {
     if (!id) {
-      throw new Error('Invalid activity ID');
+      throw new BadRequestException('Activity ID is required');
     }
     const activity = await this.activitiesDatabaseService.findById(id);
     if (!activity) {
-      throw new Error('Activity not found');
+      throw new NotFoundException(`Activity with id "${id}" not found`);
     }
     return await this.activitiesDatabaseService.remove(id);
   }

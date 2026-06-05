@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ActivitiesService } from './activities.service';
-import { CreateActivityDto, GetActivitiesDto } from './dtos/actvities.dto';
+import { CreateActivityDto, GetActivitiesDto, UpdateActivityDto } from './dtos';
 import { CategoryType } from '@vaudly/database';
 
 @Controller('activities')
@@ -39,25 +39,7 @@ export class ActivitiesController {
   }
 
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body()
-    body: {
-      name?: string;
-      description?: string | null;
-      category?: CategoryType[];
-      subtitle?: string | null;
-      date?: string | null;
-      price?: string | null;
-      startTime?: string | null;
-      endTime?: string | null;
-      locationId?: string | null;
-      address?: string | null;
-      city?: string | null;
-      latitude?: number | null;
-      longitude?: number | null;
-    },
-  ) {
+  async update(@Param('id') id: string, @Body() body: UpdateActivityDto) {
     return await this.activities.update(id, body);
   }
 

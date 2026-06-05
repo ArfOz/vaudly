@@ -13,7 +13,7 @@ export default function AddActivityPage() {
   const [form, setForm] = useState<CreateActivityDto>({
     name: "",
     description: "",
-    category: typeof CategoryType !== "undefined" ? [] : [],
+    category: [],
     price: "",
     date: "",
     location: {
@@ -61,9 +61,9 @@ export default function AddActivityPage() {
     } 
   }
 
-  const toggleCategory = (cat: string) => {
+  const toggleCategory = (cat: CategoryType) => {
     setForm((prev) => {
-      const prevCats = prev.category ?? []
+      const prevCats = (prev.category ?? []) as CategoryType[]
       const exists = prevCats.includes(cat)
       return {
         ...prev,

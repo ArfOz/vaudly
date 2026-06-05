@@ -1,4 +1,4 @@
-import { Category, CategoryType } from './../../database/generated/client/index.d';
+import { CategoryType } from './../../database/generated/client/index.d';
 export interface Location {
   id: string
   name: string | null

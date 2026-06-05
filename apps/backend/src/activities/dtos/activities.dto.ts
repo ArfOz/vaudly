@@ -95,3 +95,56 @@ export class GetActivitiesDto {
   @IsArray()
   categories?: CategoryType[];
 }
+
+export class UpdateActivityDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string | null;
+
+  @IsString()
+  @IsOptional()
+  subtitle?: string | null;
+
+  @IsString()
+  @IsOptional()
+  date?: string | null;
+
+  @IsString()
+  @IsOptional()
+  price?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(CategoryType, { each: true })
+  category?: CategoryType[];
+
+  @IsString()
+  @IsOptional()
+  startTime?: string | null;
+
+  @IsString()
+  @IsOptional()
+  endTime?: string | null;
+
+  @IsString()
+  @IsOptional()
+  locationId?: string | null;
+
+  @IsString()
+  @IsOptional()
+  address?: string | null;
+
+  @IsString()
+  @IsOptional()
+  city?: string | null;
+
+  @IsOptional()
+  latitude?: number | null;
+
+  @IsOptional()
+  longitude?: number | null;
+}
